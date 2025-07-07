@@ -16,8 +16,6 @@ services:
     build: ./backend
     ports:
       - "8020:8020"
-    volumes:
-      - ./backend:/app
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/maestro_inventario
       SECRET_KEY: inventario-maestro-inventario-secret-key-123456789abcdef
