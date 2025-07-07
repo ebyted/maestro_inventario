@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tachometer-alt"></i> Dashboard Maestro Inventario</h1>
+    <div>
+        <a href="/admin/executive-dashboard" class="btn btn-primary">
+            <i class="fas fa-chart-line"></i> Dashboard Ejecutivo
+        </a>
+    </div>
+</div>
+
+<!-- Main Navigation Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-primary h-100">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-box"></i> Gestión de Productos</h5>
+            </div>
+            <div class="card-body">
+                <p>Administra tu catálogo de productos, categorías y marcas</p>
+                <div class="d-grid gap-2">
+                    <a href="/admin/products" class="btn btn-outline-primary">
+                        <i class="fas fa-boxes"></i> Productos
+                    </a>
+                    <a href="/admin/categories" class="btn btn-outline-primary">
+                        <i class="fas fa-tags"></i> Categorías
+                    </a>
+                    <a href="/admin/brands" class="btn btn-outline-primary">
+                        <i class="fas fa-trademark"></i> Marcas
+                    </a>
+                    <a href="/admin/articles" class="btn btn-outline-success">
+                        <i class="fas fa-analytics"></i> Análisis de Artículos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-success h-100">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-truck"></i> Operaciones</h5>
+            </div>
+            <div class="card-body">
+                <p>Gestiona proveedores, almacenes y operaciones</p>
+                <div class="d-grid gap-2">
+                    <a href="/admin/suppliers" class="btn btn-outline-success">
+                        <i class="fas fa-handshake"></i> Proveedores
+                    </a>
+                    <a href="/admin/warehouses" class="btn btn-outline-success">
+                        <i class="fas fa-warehouse"></i> Almacenes
+                    </a>
+                    <a href="/admin/purchase-orders" class="btn btn-outline-warning">
+                        <i class="fas fa-shopping-cart"></i> Órdenes de Compra
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-info h-100">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-chart-bar"></i> Análisis e Inventario</h5>
+            </div>
+            <div class="card-body">
+                <p>Reportes, análisis y control de inventario</p>
+                <div class="d-grid gap-2">
+                    <a href="/admin/inventory-movements" class="btn btn-outline-info">
+                        <i class="fas fa-exchange-alt"></i> Movimientos Inventario
+                    </a>
+                    <a href="/admin/executive-dashboard" class="btn btn-outline-danger">
+                        <i class="fas fa-chart-line"></i> Dashboard Ejecutivo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas Principales -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.total_products }}</h3>
+                        <div>Total Productos</div>
+                    </div>
+                    <i class="fas fa-boxes fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.active_products }}</h3>
+                        <div>Productos Activos</div>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.total_categories }}</h3>
+                        <div>Categorías</div>
+                    </div>
+                    <i class="fas fa-tags fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.total_brands }}</h3>
+                        <div>Marcas</div>
+                    </div>
+                    <i class="fas fa-trademark fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Problems Alert -->
+{% if stats.products_without_category > 0 or stats.products_without_brand > 0 %}
+<div class="alert alert-warning mb-4">
+    <h5><i class="fas fa-exclamation-triangle"></i> Productos con relaciones incompletas</h5>
+    <ul class="mb-0">
+        {% if stats.products_without_category > 0 %}
+        <li>{{ stats.products_without_category }} productos sin categoría</li>
+        {% endif %}
+        {% if stats.products_without_brand > 0 %}
+        <li>{{ stats.products_without_brand }} productos sin marca</li>
+        {% endif %}
+    </ul>
+    <hr>
+    <a href="/admin/products?has_category=false" class="btn btn-outline-warning btn-sm">
+        Ver productos sin categoría
+    </a>
+    <a href="/admin/products?has_brand=false" class="btn btn-outline-warning btn-sm">
+        Ver productos sin marca
+    </a>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Top Categories -->
+    <div class="col-md-6">
+        <div class="table-container">
+            <h5><i class="fas fa-tags"></i> Top Categorías por Productos</h5>
+            {% if top_categories %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Productos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in top_categories %}
+                    <tr>
+                        <td>{{ category[0] if category[0] else 'Sin categoría' }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ category[1] }}</span>
+                        </td>
+                        <td>
+                            {% if category[0] %}
+                            <a href="/admin/products?category_name={{ category[0] }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% else %}
+                            <a href="/admin/products?has_category=false" class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">No hay categorías registradas</p>
+            {% endif %}
+            <div class="text-center">
+                <a href="/admin/categories" class="btn btn-primary">
+                    <i class="fas fa-list"></i> Ver todas las categorías
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Brands -->
+    <div class="col-md-6">
+        <div class="table-container">
+            <h5><i class="fas fa-trademark"></i> Top Marcas por Productos</h5>
+            {% if top_brands %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Marca</th>
+                        <th>Productos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for brand in top_brands %}
+                    <tr>
+                        <td>{{ brand[0] if brand[0] else 'Sin marca' }}</td>
+                        <td>
+                            <span class="badge bg-success">{{ brand[1] }}</span>
+                        </td>
+                        <td>
+                            {% if brand[0] %}
+                            <a href="/admin/products?brand_name={{ brand[0] }}" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% else %}
+                            <a href="/admin/products?has_brand=false" class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">No hay marcas registradas</p>
+            {% endif %}
+            <div class="text-center">
+                <a href="/admin/brands" class="btn btn-success">
+                    <i class="fas fa-list"></i> Ver todas las marcas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="table-container">
+            <h5><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+            <div class="row">
+                <div class="col-md-3">
+                    <a href="/admin/products" class="btn btn-outline-primary btn-lg w-100 mb-3">
+                        <i class="fas fa-box"></i><br>
+                        Gestionar Productos
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="/admin/categories" class="btn btn-outline-info btn-lg w-100 mb-3">
+                        <i class="fas fa-tags"></i><br>
+                        Gestionar Categorías
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="/admin/brands" class="btn btn-outline-success btn-lg w-100 mb-3">
+                        <i class="fas fa-trademark"></i><br>
+                        Gestionar Marcas
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="/docs" target="_blank" class="btn btn-outline-dark btn-lg w-100 mb-3">
+                        <i class="fas fa-book"></i><br>
+                        API Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="table-container">
+            <h5><i class="fas fa-info-circle"></i> Estado del Sistema</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Productos Activos:</strong>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" 
+                             data-active="{{ stats.active_products }}"
+                             data-total="{{ stats.total_products }}"
+                             data-type="active"></div>
+                    </div>
+                    <small>{{ stats.active_products }} de {{ stats.total_products }} productos</small>
+                </div>
+                <div class="col-md-4">
+                    <strong>Productos con Categoría:</strong>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-info"
+                             data-with-category="{{ stats.total_products - stats.products_without_category }}"
+                             data-total="{{ stats.total_products }}"
+                             data-type="category"></div>
+                    </div>
+                    <small>{{ stats.total_products - stats.products_without_category }} de {{ stats.total_products }} productos</small>
+                </div>
+                <div class="col-md-4">
+                    <strong>Productos con Marca:</strong>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-warning"
+                             data-with-brand="{{ stats.total_products - stats.products_without_brand }}"
+                             data-total="{{ stats.total_products }}"
+                             data-type="brand"></div>
+                    </div>
+                    <small>{{ stats.total_products - stats.products_without_brand }} de {{ stats.total_products }} productos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.progress {
+    height: 8px;
+}
+
+.badge {
+    font-size: 0.8em;
+}
+
+.btn-lg {
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcular y establecer anchuras de barras de progreso
+    const progressBars = document.querySelectorAll('.progress-bar[data-type]');
+    
+    progressBars.forEach(bar => {
+        const type = bar.dataset.type;
+        const total = parseInt(bar.dataset.total) || 1;
+        let current = 0;
+        let percentage = 0;
+        
+        if (type === 'active') {
+            current = parseInt(bar.dataset.active) || 0;
+        } else if (type === 'category') {
+            current = parseInt(bar.dataset.withCategory) || 0;
+        } else if (type === 'brand') {
+            current = parseInt(bar.dataset.withBrand) || 0;
+        }
+        
+        percentage = total > 0 ? (current / total * 100) : 0;
+        bar.style.width = percentage + '%';
+        
+        // Agregar tooltip con información
+        bar.setAttribute('title', `${current} de ${total} (${percentage.toFixed(1)}%)`);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Maestro Inventario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            width: 100%;
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #1976D2;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            background: #F44336;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #2196F3;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 Maestro Inventario</h1>
+            <p>Acceso al Sistema</p>
+        </div>
+
+        <div class="info">
+            <strong>Credenciales de prueba:</strong><br>
+            Email: admin@maestro.com<br>
+            Password: admin123
+        </div>
+
+        <div id="errorContainer"></div>
+        <div id="successContainer"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="admin@maestro.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" value="admin123" required>
+            </div>
+            
+            <button type="submit" class="btn" id="loginBtn">
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <div id="loadingContainer" class="loading hidden">
+            ⏳ Iniciando sesión...
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        // Función para mostrar errores
+        function showError(message) {
+            const container = document.getElementById('errorContainer');
+            container.innerHTML = `<div class="error">❌ ${message}</div>`;
+        }
+
+        // Función para mostrar éxito
+        function showSuccess(message) {
+            const container = document.getElementById('successContainer');
+            container.innerHTML = `<div class="success">✅ ${message}</div>`;
+        }
+
+        // Función para limpiar mensajes
+        function clearMessages() {
+            document.getElementById('errorContainer').innerHTML = '';
+            document.getElementById('successContainer').innerHTML = '';
+        }
+
+        // Función para mostrar/ocultar loading
+        function toggleLoading(show) {
+            const form = document.getElementById('loginForm');
+            const loading = document.getElementById('loadingContainer');
+            const btn = document.getElementById('loginBtn');
+            
+            if (show) {
+                form.classList.add('hidden');
+                loading.classList.remove('hidden');
+                btn.disabled = true;
+            } else {
+                form.classList.remove('hidden');
+                loading.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        // Función para hacer login
+        async function login(email, password) {
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Login error:', error);
+                throw error;
+            }
+        }
+
+        // Función para probar el acceso a productos
+        async function testProductsAccess(token) {
+            try {
+                const response = await fetch(`${API_BASE}/products?limit=5`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const products = await response.json();
+                return products;
+            } catch (error) {
+                console.error('Products access error:', error);
+                throw error;
+            }
+        }
+
+        // Manejar el envío del formulario
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            clearMessages();
+            toggleLoading(true);
+
+            try {
+                // Intentar login
+                const loginData = await login(email, password);
+                console.log('Login successful:', loginData);
+                
+                showSuccess('¡Login exitoso! Probando acceso a productos...');
+                
+                // Probar acceso a productos
+                const products = await testProductsAccess(loginData.access_token);
+                console.log('Products loaded:', products);
+                
+                showSuccess(
+                    `¡Acceso completo confirmado!<br>
+                    - Login exitoso<br>
+                    - Productos cargados: ${products.length || 0}<br>
+                    - Token obtenido correctamente<br><br>
+                    <strong>La pantalla de productos del frontend funcionará correctamente.</strong>`
+                );
+                
+                // Redirigir a la página de productos después de 3 segundos
+                setTimeout(() => {
+                    window.location.href = 'test_products_display.html';
+                }, 3000);
+                
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                toggleLoading(false);
+            }
+        });
+
+        // Auto-enviar el formulario para demostración
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Página cargada. Formulario listo para usar.');
+        });
+    </script>
+</body>
+</html>

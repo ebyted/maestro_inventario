@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maestro Inventario - Backend API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .feature h3 {
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+        }
+        
+        .links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn.primary {
+            background: #ffd700;
+            color: #333;
+            border-color: #ffd700;
+        }
+        
+        .btn.primary:hover {
+            background: #ffed4a;
+        }
+        
+        .status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(34, 197, 94, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .version {
+            margin-top: 1rem;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📦</div>
+        <h1>Maestro Inventario</h1>
+        <p class="subtitle">Sistema de Gestión de Inventario</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🏢 Multi-Empresa</h3>
+                <p>Gestiona múltiples negocios desde una sola plataforma</p>
+            </div>
+            <div class="feature">
+                <h3>🏪 Multi-Almacén</h3>
+                <p>Controla inventario en diferentes ubicaciones</p>
+            </div>
+            <div class="feature">
+                <h3>🛒 Punto de Venta</h3>
+                <p>Sistema POS integrado y fácil de usar</p>
+            </div>
+            <div class="feature">
+                <h3>📊 Reportes</h3>
+                <p>Análisis detallados y reportes en tiempo real</p>
+            </div>
+        </div>
+        
+        <div class="status">
+            <span class="status-dot"></span>
+            <strong>API Backend Activo</strong>
+            <p>Todos los servicios están funcionando correctamente</p>
+        </div>
+        
+        <div class="links">
+            <a href="/docs" class="btn primary">📚 Documentación API</a>
+            <a href="/api/v1/test" class="btn">🧪 Test API</a>
+            <a href="/health" class="btn">💓 Estado de Salud</a>
+            <a href="/static/test-connection.html" class="btn">🔗 Test Conexión</a>
+        </div>
+        
+        <div class="version">
+            <p>Backend API v1.0.0</p>
+            <p>FastAPI + Python</p>
+        </div>
+    </div>
+    
+    <script>
+        // Verificar el estado del API automáticamente
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                console.log('API Health:', data);
+            } catch (error) {
+                console.error('Error checking API health:', error);
+            }
+        }
+        
+        // Verificar cada 30 segundos
+        setInterval(checkHealth, 30000);
+        checkHealth(); // Verificar inmediatamente
+    </script>
+</body>
+</html>

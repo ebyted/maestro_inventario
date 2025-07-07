@@ -1,0 +1,132 @@
+{
+  "app": {
+    "name": "Maestro Inventario",
+    "welcome": "Welcome to Maestro Inventario"
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Sign Up",
+    "logout": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "loginTitle": "Sign in to your account",
+    "registerTitle": "Create Account",
+    "registerSubtitle": "Register for Maestro Inventario",
+    "noAccount": "Don't have an account? Sign up",
+    "hasAccount": "Already have an account? Sign in",
+    "loginButton": "Sign In",
+    "registerButton": "Register",
+    "forgotPassword": "Forgot your password?",
+    "errors": {
+      "fillAllFields": "Please fill in all fields",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match",
+      "invalidEmail": "Please enter a valid email",
+      "loginFailed": "Incorrect credentials",
+      "registrationFailed": "Could not create account"
+    },
+    "success": {
+      "accountCreated": "Account created successfully"
+    }
+  },
+  "navigation": {
+    "dashboard": "Home",
+    "products": "Products",
+    "inventory": "Inventory",
+    "sales": "Sales",
+    "business": "Business",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "welcome": "Welcome, {{name}}",
+    "noBusiness": "No business selected",
+    "noWarehouse": "No warehouse selected",
+    "quickActions": "Quick Actions",
+    "newSale": "New Sale",
+    "manageProducts": "Manage Products",
+    "viewInventory": "View Inventory",
+    "stats": {
+      "products": "Products",
+      "lowStock": "Low Stock",
+      "salesToday": "Sales Today",
+      "users": "Users"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "search": "Search products...",
+    "noCategory": "No category",
+    "noBrand": "No brand",
+    "noDescription": "No description",
+    "sku": "SKU",
+    "category": "Category",
+    "brand": "Brand",
+    "detail": "Product Detail",
+    "create": "Create Product",
+    "edit": "Edit Product"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "subtitle": "Stock management by warehouse",
+    "viewCurrent": "View Current Stock",
+    "adjust": "Adjust Inventory",
+    "currentStock": "Current Stock",
+    "adjustInventory": "Adjust Inventory"
+  },
+  "sales": {
+    "title": "Sales",
+    "subtitle": "Sales history and management",
+    "newSale": "New Sale (POS)",
+    "history": "View History",
+    "pos": "Point of Sale",
+    "cart": "Cart",
+    "total": "Total",
+    "processSale": "Process Sale",
+    "addToCart": "Add to Cart"
+  },
+  "business": {
+    "title": "Business Configuration",
+    "currentBusiness": "Current Business:",
+    "currentWarehouse": "Current Warehouse:",
+    "notSelected": "Not selected",
+    "manageBusinesses": "Manage Businesses",
+    "manageWarehouses": "Manage Warehouses",
+    "manageUsers": "Manage Users"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "about": "About"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "name": "Name",
+    "description": "Description",
+    "price": "Price",
+    "quantity": "Quantity",
+    "date": "Date",
+    "actions": "Actions"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español"
+  }
+}

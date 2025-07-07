@@ -1,0 +1,9 @@
+RESUMEN DETALLADO DE IMPORTACIÓN
+==================================================
+Fecha: 2025-07-06 03:57:14.105238
+Archivo: productos.csv
+Total filas: 2533
+Productos creados: 2532
+Productos omitidos: 0
+Errores: 0
+

@@ -1,0 +1,3 @@
+name,description,sku,barcode,category,brand,base_unit,minimum_stock,maximum_stock,cost_price,selling_price
+Laptop Dell Inspiron,High-performance laptop for business,DELL-INSP-001,1234567890123,Electronics,Dell,piece,5,50,800.00,1200.00
+Office Chair Ergonomic,Comfortable ergonomic office chair,CHAIR-ERG-001,1234567890124,Furniture,Herman Miller,piece,10,100,300.00,450.00

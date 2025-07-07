@@ -1,0 +1,218 @@
+{
+  "app": {
+    "name": "Maestro Inventario",
+    "welcome": "Bienvenido a Maestro Inventario"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar Sesión",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "loginTitle": "Inicia sesión en tu cuenta",
+    "registerTitle": "Crear Cuenta",
+    "registerSubtitle": "Regístrate en Maestro Inventario",
+    "noAccount": "¿No tienes cuenta? Regístrate",
+    "hasAccount": "¿Ya tienes cuenta? Inicia sesión",
+    "loginButton": "Iniciar Sesión",
+    "registerButton": "Registrarse",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "errors": {
+      "fillAllFields": "Por favor completa todos los campos",
+      "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "invalidEmail": "Por favor ingresa un email válido",
+      "loginFailed": "Credenciales incorrectas",
+      "registrationFailed": "No se pudo crear la cuenta"
+    },
+    "success": {
+      "accountCreated": "Cuenta creada exitosamente"
+    }
+  },
+  "navigation": {
+    "dashboard": "Inicio",
+    "products": "Productos",
+    "inventory": "Inventario",
+    "sales": "Ventas",
+    "business": "Negocio",
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido, {{name}}",
+    "noBusiness": "Sin negocio seleccionado",
+    "noWarehouse": "Sin almacén seleccionado",
+    "quickActions": "Acciones Rápidas",
+    "newSale": "Nueva Venta",
+    "manageProducts": "Gestionar Productos",
+    "viewInventory": "Ver Inventario",
+    "stats": {
+      "products": "Productos",
+      "lowStock": "Stock Bajo",
+      "salesToday": "Ventas Hoy",
+      "users": "Usuarios"
+    }
+  },
+  "products": {
+    "title": "Productos",
+    "search": "Buscar productos...",
+    "noCategory": "Sin categoría",
+    "noBrand": "Sin marca",
+    "noDescription": "Sin descripción",
+    "sku": "SKU",
+    "category": "Categoría",
+    "brand": "Marca",
+    "detail": "Detalle del Producto",
+    "create": "Crear Producto",
+    "edit": "Editar Producto"
+  },
+  "inventory": {
+    "title": "Inventario",
+    "subtitle": "Gestión de stock por almacén",
+    "viewCurrent": "Ver Stock Actual",
+    "adjust": "Ajustar Inventario",
+    "currentStock": "Stock Actual",
+    "adjustInventory": "Ajustar Inventario"
+  },
+  "sales": {
+    "title": "Ventas",
+    "subtitle": "Historial y gestión de ventas",
+    "newSale": "Nueva Venta (POS)",
+    "history": "Ver Historial",
+    "pos": "Punto de Venta",
+    "cart": "Carrito",
+    "total": "Total",
+    "processSale": "Procesar Venta",
+    "addToCart": "Agregar al Carrito"
+  },
+  "business": {
+    "title": "Configuración del Negocio",
+    "currentBusiness": "Negocio Actual:",
+    "currentWarehouse": "Almacén Actual:",
+    "notSelected": "No seleccionado",
+    "manageBusinesses": "Gestionar Negocios",
+    "manageWarehouses": "Gestionar Almacenes",
+    "manageUsers": "Gestionar Usuarios"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "selectLanguage": "Seleccionar Idioma",
+    "theme": "Tema",
+    "notifications": "Notificaciones",
+    "about": "Acerca de"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Agregar",
+    "search": "Buscar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "clearAll": "Limpiar Todo",
+    "ago": "hace",
+    "loading": "Cargando...",
+    "name": "Nombre",
+    "description": "Descripción",
+    "price": "Precio",
+    "quantity": "Cantidad",
+    "date": "Fecha",
+    "actions": "Acciones"
+  },
+  "inventory": {
+    "title": "Inventario",
+    "stockView": "Ver Stock",
+    "adjustInventory": "Ajustar Inventario",
+    "stockAlerts": "Alertas de Stock",
+    "warehouse": "Almacén",
+    "movementInfo": "Información del Movimiento",
+    "reference": "Referencia",
+    "referencePlaceholder": "Número de referencia",
+    "notes": "Notas",
+    "notesPlaceholder": "Notas adicionales",
+    "items": "Artículos",
+    "addProduct": "Agregar Producto",
+    "unitCost": "Costo Unitario",
+    "itemNotes": "Notas del Artículo",
+    "itemNotesPlaceholder": "Notas específicas del artículo",
+    "processMovement": "Procesar Movimiento",
+    "selectProduct": "Seleccionar Producto",
+    "searchProducts": "Buscar productos",
+    "defaultVariant": "Variante por defecto",
+    "currentStock": "Stock Actual",
+    "movements": {
+      "entry": "Entrada de Inventario",
+      "exit": "Salida de Inventario",
+      "adjustment": "Ajuste de Inventario",
+      "movement": "Movimiento",
+      "processedSuccessfully": "Movimiento procesado exitosamente"
+    },
+    "errors": {
+      "loadWarehousesFailed": "Error al cargar almacenes",
+      "selectWarehouse": "Debe seleccionar un almacén",
+      "noItemsAdded": "Debe agregar al menos un artículo",
+      "invalidQuantity": "La cantidad debe ser mayor a 0",
+      "invalidUnitCost": "El costo unitario debe ser válido",
+      "processingFailed": "Error al procesar el movimiento",
+      "productAlreadyAdded": "Producto ya agregado",
+      "productAlreadyAddedDescription": "Este producto ya está en la lista"
+    }
+  },
+  "products": {
+    "title": "Productos",
+    "catalog": "Catálogo de Productos",
+    "detail": "Detalle del Producto",
+    "noProducts": "No hay productos disponibles",
+    "noResultsFound": "No se encontraron resultados",
+    "addProduct": "Agregar Producto",
+    "searchPlaceholder": "Buscar productos...",
+    "activeFilters": "Filtros activos",
+    "total": "Total",
+    "active": "Activos",
+    "lowStock": "Stock Bajo",
+    "outOfStock": "Sin Stock",
+    "errors": {
+      "loadFailed": "Error al cargar productos"
+    }
+  },
+  "alerts": {
+    "all": "Todas",
+    "outOfStock": "Sin Stock",
+    "lowStock": "Stock Bajo",
+    "overstock": "Sobrestock",
+    "stockAlerts": "Alertas de Stock",
+    "totalAlerts": "Total",
+    "unacknowledgedCount": "{{count}} sin revisar",
+    "noAlerts": "No hay alertas de stock",
+    "noAlertsOfType": "No hay alertas de {{type}}",
+    "allStockLevelsNormal": "Todos los niveles de stock están normales",
+    "warehouse": "Almacén",
+    "currentStock": "Stock Actual",
+    "minimumStock": "Stock Mínimo",
+    "recommendedOrder": "Pedido Recomendado",
+    "adjustStock": "Ajustar Stock",
+    "createOrder": "Crear Orden",
+    "defaultVariant": "Variante por defecto",
+    "acknowledgeFailed": "Error al marcar alerta",
+    "loadFailed": "Error al cargar alertas",
+    "createPurchaseOrderDescription": "¿Crear orden de compra para {{product}} con cantidad {{quantity}}?"
+  },
+  "purchases": {
+    "createPurchaseOrder": "Crear Orden de Compra"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español"
+  }
+}

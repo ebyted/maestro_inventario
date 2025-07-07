@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Conexión Frontend-Backend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .pending { border-left: 4px solid #FF9800; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1976D2; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔗 Test de Conexión Frontend-Backend</h1>
+    
+    <div class="test-container pending" id="health-test">
+        <h3>1. Test Health Check</h3>
+        <button onclick="testHealthCheck()">Probar Health Check</button>
+        <div id="health-result"></div>
+    </div>
+
+    <div class="test-container pending" id="api-test">
+        <h3>2. Test API Endpoint</h3>
+        <button onclick="testAPIEndpoint()">Probar API Test</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="test-container pending" id="login-test">
+        <h3>3. Test Login</h3>
+        <button onclick="testLogin()">Probar Login</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="test-container pending" id="cors-test">
+        <h3>4. Test CORS</h3>
+        <button onclick="testCORS()">Probar CORS</button>
+        <div id="cors-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8020';
+
+        async function testHealthCheck() {
+            const container = document.getElementById('health-test');
+            const result = document.getElementById('health-result');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                container.className = 'test-container success';
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                container.className = 'test-container error';
+            }
+        }
+
+        async function testAPIEndpoint() {
+            const container = document.getElementById('api-test');
+            const result = document.getElementById('api-result');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/test`);
+                const data = await response.json();
+                
+                result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                container.className = 'test-container success';
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                container.className = 'test-container error';
+            }
+        }
+
+        async function testLogin() {
+            const container = document.getElementById('login-test');
+            const result = document.getElementById('login-result');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                container.className = 'test-container success';
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                container.className = 'test-container error';
+            }
+        }
+
+        async function testCORS() {
+            const container = document.getElementById('cors-test');
+            const result = document.getElementById('cors-result');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Origin': 'http://localhost:8082'
+                    }
+                });
+                
+                if (response.ok) {
+                    result.innerHTML = '<p style="color: green;">✅ CORS configurado correctamente</p>';
+                    container.className = 'test-container success';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">❌ Error CORS: ${error.message}</p>`;
+                container.className = 'test-container error';
+            }
+        }
+
+        // Auto-ejecutar tests al cargar la página
+        window.onload = function() {
+            setTimeout(testHealthCheck, 500);
+            setTimeout(testAPIEndpoint, 1000);
+            setTimeout(testLogin, 1500);
+            setTimeout(testCORS, 2000);
+        };
+    </script>
+</body>
+</html>
