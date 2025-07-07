@@ -59,7 +59,7 @@ class Business(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), nullable=False)
-    description = Column(Text)
+    description = Column(Text) 
     code = Column(String(50), unique=True, index=True)
     tax_id = Column(String(50))
     rfc = Column(String(50))  # RFC field that the application expects
