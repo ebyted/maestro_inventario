@@ -22,7 +22,7 @@ def crear_tablas():
         time.sleep(10)
         
         print("🏗️ Creando todas las tablas...")
-        Base.metadata.create_all(bind=engine)
+        # Base.metadata.create_all(bind=engine)  # Solo para desarrollo, comentar en producción
         
         print("✅ Tablas creadas exitosamente")
         

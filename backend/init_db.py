@@ -13,8 +13,8 @@ from datetime import datetime
 def init_db():
     """Inicializar base de datos con datos por defecto"""
     
-    # Crear tablas
-    Base.metadata.create_all(bind=engine)
+    # Crear tablas (solo para desarrollo, comentar en producción)
+    # Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
     

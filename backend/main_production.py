@@ -16,8 +16,8 @@ from app.api.v1.api import api_router
 from app.api.v1.endpoints.admin_panel import router as admin_router
 from app.api.v1.endpoints import auth
 
-# Crear tablas
-Base.metadata.create_all(bind=engine)
+# Crear tablas (solo para desarrollo, comentar en producción)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
