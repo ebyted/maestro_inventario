@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple - Maestro Inventario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Simple - Maestro Inventario</h1>
+    
+    <div class="container">
+        <h2>🔍 Estado del Sistema</h2>
+        <div id="systemStatus">
+            <div class="status info">🔄 Verificando estado del sistema...</div>
+        </div>
+        <button onclick="checkSystem()">Verificar Sistema</button>
+        <button onclick="openFrontend()">Abrir Frontend</button>
+        <button onclick="testBackend()">Test Backend</button>
+    </div>
+
+    <div class="container">
+        <h2>📱 Frontend Preview</h2>
+        <p>Si el frontend está funcionando, debería aparecer aquí:</p>
+        <iframe id="frontendFrame" src="about:blank"></iframe>
+        <button onclick="loadFrontend()">Cargar Frontend</button>
+        <button onclick="refreshFrame()">Actualizar</button>
+    </div>
+
+    <div class="container">
+        <h2>📊 Logs del Sistema</h2>
+        <div id="logs" style="background: #f8f9fa; padding: 10px; border-radius: 4px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('logs');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('systemStatus');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            statusDiv.innerHTML = `<div class="status ${className}">${message}</div>`;
+        }
+
+        async function checkSystem() {
+            log('🔄 Iniciando verificación del sistema...');
+            updateStatus('🔄 Verificando sistema...', 'info');
+            
+            try {
+                // Check backend
+                log('🔍 Verificando backend...');
+                const backendResponse = await fetch('http://localhost:8000/');
+                if (backendResponse.ok) {
+                    log('✅ Backend funcionando correctamente', 'success');
+                } else {
+                    log(`⚠️ Backend responde con estado: ${backendResponse.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`❌ Error de backend: ${error.message}`, 'error');
+            }
+
+            try {
+                // Check frontend
+                log('🔍 Verificando frontend...');
+                const frontendResponse = await fetch('http://localhost:19006/');
+                if (frontendResponse.ok) {
+                    log('✅ Frontend funcionando correctamente', 'success');
+                    updateStatus('✅ Sistema funcionando correctamente', 'success');
+                } else {
+                    log(`⚠️ Frontend responde con estado: ${frontendResponse.status}`, 'warning');
+                    updateStatus('⚠️ Frontend con problemas', 'warning');
+                }
+            } catch (error) {
+                log(`❌ Error de frontend: ${error.message}`, 'error');
+                updateStatus('❌ Frontend no disponible', 'error');
+            }
+        }
+
+        function loadFrontend() {
+            log('🔄 Cargando frontend en iframe...');
+            const iframe = document.getElementById('frontendFrame');
+            iframe.src = 'http://localhost:19006/';
+            
+            iframe.onload = () => {
+                log('✅ Frontend cargado en iframe', 'success');
+            };
+            
+            iframe.onerror = () => {
+                log('❌ Error al cargar frontend en iframe', 'error');
+            };
+        }
+
+        function refreshFrame() {
+            log('🔄 Actualizando iframe...');
+            const iframe = document.getElementById('frontendFrame');
+            iframe.src = iframe.src;
+        }
+
+        function openFrontend() {
+            log('🚀 Abriendo frontend en nueva pestaña...');
+            window.open('http://localhost:19006/', '_blank');
+        }
+
+        async function testBackend() {
+            log('🔄 Testeando endpoint de productos...');
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/products');
+                if (response.ok) {
+                    const products = await response.json();
+                    log(`✅ API de productos: ${products.length} productos encontrados`, 'success');
+                } else {
+                    log(`❌ Error en API de productos: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error de conexión con API: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            log('🚀 Página de test cargada');
+            setTimeout(checkSystem, 1000);
+        });
+    </script>
+</body>
+</html>

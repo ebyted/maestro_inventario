@@ -1,0 +1,247 @@
+{
+  "statistics": {
+    "categories_found": 101,
+    "categories_created": 3,
+    "categories_existing": 98,
+    "brands_found": 202,
+    "brands_created": 43,
+    "brands_existing": 159,
+    "rows_processed": 2533,
+    "errors": 0
+  },
+  "categories_created": [
+    {
+      "name": "ANTBIOTICO",
+      "code": "ANTBIOTICO",
+      "id": 105
+    },
+    {
+      "name": "ANTINFLAMATORIO",
+      "code": "ANTINFLAMATORIO",
+      "id": 106
+    },
+    {
+      "name": "DOLOR CABEZA",
+      "code": "DOLOR_CABEZA",
+      "id": 107
+    }
+  ],
+  "brands_created": [
+    {
+      "name": "ACCORD",
+      "code": "ACCORD",
+      "id": 166
+    },
+    {
+      "name": "ASOFARMA",
+      "code": "ASOFARMA",
+      "id": 167
+    },
+    {
+      "name": "ASPEN",
+      "code": "ASPEN",
+      "id": 168
+    },
+    {
+      "name": "BOEHRINGER INGELHEM",
+      "code": "BOEHRINGER_INGELHEM",
+      "id": 169
+    },
+    {
+      "name": "BQM",
+      "code": "BQM",
+      "id": 170
+    },
+    {
+      "name": "BREMER",
+      "code": "BREMER",
+      "id": 171
+    },
+    {
+      "name": "BRULART",
+      "code": "BRULART",
+      "id": 172
+    },
+    {
+      "name": "BRULUAGSA",
+      "code": "BRULUAGSA",
+      "id": 173
+    },
+    {
+      "name": "CB LA PIEDAD",
+      "code": "CB_LA_PIEDAD",
+      "id": 174
+    },
+    {
+      "name": "DINA",
+      "code": "DINA",
+      "id": 175
+    },
+    {
+      "name": "EDERKA",
+      "code": "EDERKA",
+      "id": 176
+    },
+    {
+      "name": "ENER GREEN",
+      "code": "ENER_GREEN",
+      "id": 177
+    },
+    {
+      "name": "GELpharma",
+      "code": "GELPHARMA",
+      "id": 178
+    },
+    {
+      "name": "GENOMMALAB",
+      "code": "GENOMMALAB",
+      "id": 179
+    },
+    {
+      "name": "GISEL",
+      "code": "GISEL",
+      "id": 180
+    },
+    {
+      "name": "GLUNOVAG",
+      "code": "GLUNOVAG",
+      "id": 181
+    },
+    {
+      "name": "GRIN",
+      "code": "GRIN",
+      "id": 182
+    },
+    {
+      "name": "GRUNENTHAL",
+      "code": "GRUNENTHAL",
+      "id": 183
+    },
+    {
+      "name": "HALEON",
+      "code": "HALEON",
+      "id": 184
+    },
+    {
+      "name": "IFA CELTICS",
+      "code": "IFA_CELTICS",
+      "id": 185
+    },
+    {
+      "name": "IMPLEMEDIX",
+      "code": "IMPLEMEDIX",
+      "id": 186
+    },
+    {
+      "name": "JASSEN-CILAG",
+      "code": "JASSEN_CILAG",
+      "id": 187
+    },
+    {
+      "name": "KENDRICK",
+      "code": "KENDRICK",
+      "id": 188
+    },
+    {
+      "name": "KENER",
+      "code": "KENER",
+      "id": 189
+    },
+    {
+      "name": "LAKESIDE",
+      "code": "LAKESIDE",
+      "id": 190
+    },
+    {
+      "name": "LANDSTEINER",
+      "code": "LANDSTEINER",
+      "id": 191
+    },
+    {
+      "name": "MEGAMIX",
+      "code": "MEGAMIX",
+      "id": 192
+    },
+    {
+      "name": "NATURAL FLOWER",
+      "code": "NATURAL_FLOWER",
+      "id": 193
+    },
+    {
+      "name": "NORDIMEX",
+      "code": "NORDIMEX",
+      "id": 194
+    },
+    {
+      "name": "NUCITEC",
+      "code": "NUCITEC",
+      "id": 195
+    },
+    {
+      "name": "ORAL-B",
+      "code": "ORAL_B",
+      "id": 196
+    },
+    {
+      "name": "PHARMA RX",
+      "code": "PHARMA_RX",
+      "id": 197
+    },
+    {
+      "name": "PONDS",
+      "code": "PONDS",
+      "id": 198
+    },
+    {
+      "name": "PROBIOMED",
+      "code": "PROBIOMED",
+      "id": 199
+    },
+    {
+      "name": "PSICOPHARMA",
+      "code": "PSICOPHARMA",
+      "id": 200
+    },
+    {
+      "name": "ROCHE",
+      "code": "ROCHE",
+      "id": 201
+    },
+    {
+      "name": "SCHOEN",
+      "code": "SCHOEN",
+      "id": 202
+    },
+    {
+      "name": "STREGER",
+      "code": "STREGER",
+      "id": 203
+    },
+    {
+      "name": "SYNTEX",
+      "code": "SYNTEX",
+      "id": 204
+    },
+    {
+      "name": "VITAE",
+      "code": "VITAE",
+      "id": 205
+    },
+    {
+      "name": "WANDEL",
+      "code": "WANDEL",
+      "id": 206
+    },
+    {
+      "name": "WESER PHARMA",
+      "code": "WESER_PHARMA",
+      "id": 207
+    },
+    {
+      "name": "ZAMBON",
+      "code": "ZAMBON",
+      "id": 208
+    }
+  ],
+  "errors": []
+}

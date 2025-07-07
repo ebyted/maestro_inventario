@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Productos del Frontend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #2196F3;
+            color: white;
+            border-radius: 8px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            background: white;
+            transition: box-shadow 0.2s;
+        }
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .product-sku {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .product-category {
+            font-size: 14px;
+            color: #007bff;
+            margin-bottom: 4px;
+        }
+        .product-brand {
+            font-size: 14px;
+            color: #28a745;
+            margin-bottom: 8px;
+        }
+        .product-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 Maestro Inventario - Productos</h1>
+            <p>Visualización de los productos importados</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="loadProducts()">🔄 Recargar Productos</button>
+            <button class="btn btn-secondary" onclick="loadCategories()">📋 Cargar Categorías</button>
+            <input type="text" class="search-bar" id="searchInput" placeholder="🔍 Buscar productos..." onkeyup="filterProducts()">
+        </div>
+
+        <div id="statusContainer"></div>
+
+        <div class="stats" id="statsContainer">
+            <div class="stat-item">
+                <div class="stat-number" id="totalProducts">-</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="activeProducts">-</div>
+                <div class="stat-label">Activos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalCategories">-</div>
+                <div class="stat-label">Categorías</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="displayedProducts">-</div>
+                <div class="stat-label">Mostrados</div>
+            </div>
+        </div>
+
+        <div id="productsContainer">
+            <div class="loading">⏳ Cargando productos...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        let authToken = null;
+        let allProducts = [];
+        let categories = [];
+
+        // Login automático
+        async function autoLogin() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@maestro.com', password: 'admin123' })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    showStatus('✅ Login exitoso', 'success');
+                    return true;
+                } else {
+                    throw new Error(`Login failed: ${response.status}`);
+                }
+            } catch (error) {
+                showStatus(`❌ Error en login: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Cargar productos
+        async function loadProducts() {
+            if (!authToken) {
+                const loginOk = await autoLogin();
+                if (!loginOk) return;
+            }
+
+            try {
+                showStatus('⏳ Cargando productos...', 'loading');
+
+                const response = await fetch(`${API_BASE}/products?limit=50`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    allProducts = await response.json();
+                    updateStats();
+                    displayProducts(allProducts);
+                    showStatus(`✅ ${allProducts.length} productos cargados correctamente`, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                showStatus(`❌ Error cargando productos: ${error.message}`, 'error');
+            }
+        }
+
+        // Cargar categorías
+        async function loadCategories() {
+            if (!authToken) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/categories?business_id=1`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    categories = await response.json();
+                    document.getElementById('totalCategories').textContent = categories.length;
+                    showStatus(`✅ ${categories.length} categorías cargadas`, 'success');
+                } else {
+                    console.warn('No se pudieron cargar las categorías');
+                }
+            } catch (error) {
+                console.warn('Error cargando categorías:', error);
+            }
+        }
+
+        // Mostrar productos
+        function displayProducts(products) {
+            const container = document.getElementById('productsContainer');
+            
+            if (products.length === 0) {
+                container.innerHTML = '<div class="loading">No se encontraron productos</div>';
+                return;
+            }
+
+            const html = `
+                <div class="products-grid">
+                    ${products.map(product => `
+                        <div class="product-card">
+                            <div class="product-name">${product.name || 'Sin nombre'}</div>
+                            <div class="product-sku">SKU: ${product.sku || 'N/A'}</div>
+                            <div class="product-category">📂 ${product.category || 'Sin categoría'}</div>
+                            <div class="product-brand">🏷️ ${product.brand || 'Sin marca'}</div>
+                            <div class="product-status ${product.is_active ? 'status-active' : 'status-inactive'}">
+                                ${product.is_active ? '✅ Activo' : '❌ Inactivo'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            document.getElementById('displayedProducts').textContent = products.length;
+        }
+
+        // Filtrar productos
+        function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayProducts(allProducts);
+                return;
+            }
+
+            const filtered = allProducts.filter(product => 
+                (product.name || '').toLowerCase().includes(searchTerm) ||
+                (product.sku || '').toLowerCase().includes(searchTerm) ||
+                (product.category || '').toLowerCase().includes(searchTerm) ||
+                (product.brand || '').toLowerCase().includes(searchTerm)
+            );
+
+            displayProducts(filtered);
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            const activeProducts = allProducts.filter(p => p.is_active).length;
+            
+            document.getElementById('totalProducts').textContent = allProducts.length;
+            document.getElementById('activeProducts').textContent = activeProducts;
+            document.getElementById('displayedProducts').textContent = allProducts.length;
+        }
+
+        // Mostrar estado
+        function showStatus(message, type) {
+            const container = document.getElementById('statusContainer');
+            container.innerHTML = `<div class="${type}">${message}</div>`;
+            
+            // Auto-ocultar después de 5 segundos si es éxito
+            if (type === 'success') {
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            loadCategories();
+        });
+    </script>
+</body>
+</html>

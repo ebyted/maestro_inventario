@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Frontend-Backend</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico de Conexión</h1>
+    
+    <button onclick="runAllTests()">Ejecutar Todas las Pruebas</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8020';
+        
+        async function testConnection(name, url, options = {}) {
+            const resultsDiv = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test loading';
+            testDiv.innerHTML = `<h3>${name}</h3><p>Probando...</p>`;
+            resultsDiv.appendChild(testDiv);
+            
+            try {
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const contentType = response.headers.get('content-type');
+                let data;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+                
+                testDiv.className = 'test success';
+                testDiv.innerHTML = `
+                    <h3>✅ ${name}</h3>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>Content-Type:</strong> ${contentType}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                testDiv.className = 'test error';
+                testDiv.innerHTML = `
+                    <h3>❌ ${name}</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Tipo:</strong> ${error.name}</p>
+                    ${error.stack ? `<pre>${error.stack}</pre>` : ''}
+                `;
+                console.error(`Error en ${name}:`, error);
+            }
+        }
+        
+        async function runAllTests() {
+            document.getElementById('results').innerHTML = '';
+            
+            // Test 1: Health check
+            await testConnection('Health Check', `${API_BASE}/health`);
+            
+            // Test 2: API Test
+            await testConnection('API Test', `${API_BASE}/api/v1/test`);
+            
+            // Test 3: CORS Preflight
+            await testConnection('CORS Test', `${API_BASE}/health`, {
+                method: 'GET',
+                headers: {
+                    'Origin': 'http://localhost:8083',
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': 'Content-Type'
+                }
+            });
+            
+            // Test 4: Login endpoint
+            await testConnection('Login Test', `${API_BASE}/api/v1/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Origin': 'http://localhost:8083'
+                },
+                body: JSON.stringify({
+                    email: 'test@example.com',
+                    password: 'password123'
+                })
+            });
+            
+            // Test 5: Root page
+            await testConnection('Root Page', `${API_BASE}/`);
+        }
+        
+        // Ejecutar automáticamente al cargar
+        window.onload = () => {
+            setTimeout(runAllTests, 500);
+        };
+    </script>
+</body>
+</html>

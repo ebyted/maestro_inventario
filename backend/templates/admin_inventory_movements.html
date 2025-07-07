@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis de Movimientos de Inventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-exchange-alt"></i> Análisis de Movimientos de Inventario</h1>
+    <a href="/admin/inventory-movements/export{% if search or movement_type or product_id or warehouse_id or date_from or date_to %}?search={{ search }}&movement_type={{ movement_type }}&product_id={{ product_id }}&warehouse_id={{ warehouse_id }}&date_from={{ date_from }}&date_to={{ date_to }}{% endif %}" 
+       class="btn btn-success">
+        <i class="fas fa-file-excel"></i> Exportar a Excel
+    </a>
+</div>
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.total_movements }}</h3>
+                        <p class="mb-0">Total Movimientos</p>
+                    </div>
+                    <i class="fas fa-exchange-alt fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.movements_in }}</h3>
+                        <p class="mb-0">Entradas</p>
+                    </div>
+                    <i class="fas fa-arrow-down fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.movements_out }}</h3>
+                        <p class="mb-0">Salidas</p>
+                    </div>
+                    <i class="fas fa-arrow-up fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3>{{ stats.movements_today }}</h3>
+                        <p class="mb-0">Hoy</p>
+                    </div>
+                    <i class="fas fa-calendar-day fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros Avanzados -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros Avanzados</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search }}" placeholder="Producto, SKU o referencia...">
+            </div>
+            <div class="col-md-2">
+                <label for="movement_type" class="form-label">Tipo</label>
+                <select class="form-select" name="movement_type">
+                    <option value="">Todos</option>
+                    {% for type in movement_types %}
+                        <option value="{{ type.value }}" {% if movement_type == type.value %}selected{% endif %}>
+                            {{ type.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="product_id" class="form-label">Producto</label>
+                <select class="form-select" name="product_id">
+                    <option value="">Todos los productos</option>
+                    {% for product in products %}
+                        <option value="{{ product.id }}" {% if product_id == product.id %}selected{% endif %}>
+                            {{ product.name }} ({{ product.code }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="warehouse_id" class="form-label">Almacén</label>
+                <select class="form-select" name="warehouse_id">
+                    <option value="">Todos</option>
+                    {% for warehouse in warehouses %}
+                        <option value="{{ warehouse.id }}" {% if warehouse_id == warehouse.id %}selected{% endif %}>
+                            {{ warehouse.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label for="date_from" class="form-label">Desde</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="col-md-1">
+                <label for="date_to" class="form-label">Hasta</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+                <a href="/admin/inventory-movements" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i> Limpiar Filtros
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de Movimientos -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Movimientos de Inventario ({{ total }} total)</h5>
+    </div>
+    <div class="card-body">
+        {% if movements %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Almacén</th>
+                            <th>Cantidad</th>
+                            <th>Stock</th>
+                            <th>Referencia</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movement in movements %}
+                        <tr>
+                            <td>{{ movement.created_at | datetime }}</td>
+                            <td>
+                                {% if movement.movement_type.value == 'entry' %}
+                                    <span class="badge bg-success">Entrada</span>
+                                {% elif movement.movement_type.value == 'exit' %}
+                                    <span class="badge bg-danger">Salida</span>
+                                {% elif movement.movement_type.value == 'transfer' %}
+                                    <span class="badge bg-info">Transferencia</span>
+                                {% elif movement.movement_type.value == 'adjustment' %}
+                                    <span class="badge bg-warning">Ajuste</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if movement.product_variant and movement.product_variant.product %}
+                                    <strong>{{ movement.product_variant.product.name }}</strong>
+                                    {% if movement.product_variant.product.sku %}
+                                        <br><small class="text-muted">{{ movement.product_variant.product.sku }}</small>
+                                    {% endif %}
+                                    {% if movement.product_variant.name %}
+                                        <br><small class="text-info">{{ movement.product_variant.name }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ movement.warehouse.name if movement.warehouse else '-' }}</td>
+                            <td>
+                                {% if movement.movement_type.value == 'entry' %}
+                                    <span class="text-success">+{{ movement.quantity }}</span>
+                                {% elif movement.movement_type.value == 'exit' %}
+                                    <span class="text-danger">-{{ movement.quantity }}</span>
+                                {% else %}
+                                    {{ movement.quantity }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ movement.previous_stock }} → </small>
+                                <strong>{{ movement.new_stock }}</strong>
+                            </td>
+                            <td>{{ movement.reference_number or '-' }}</td>
+                            <td>
+                                {% if movement.notes %}
+                                    <small title="{{ movement.notes }}">{{ movement.notes[:30] }}{% if movement.notes|length > 30 %}...{% endif %}</small>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginación -->
+            {% if total_pages > 1 %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page - 1 }}&search={{ search }}&movement_type={{ movement_type }}&product_id={{ product_id or '' }}&warehouse_id={{ warehouse_id or '' }}&date_from={{ date_from }}&date_to={{ date_to }}&per_page={{ per_page }}">Anterior</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for p in range(1, total_pages + 1) %}
+                        {% if p == page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ p }}</span>
+                            </li>
+                        {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 2 and p <= page + 2) %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ p }}&search={{ search }}&movement_type={{ movement_type }}&product_id={{ product_id or '' }}&warehouse_id={{ warehouse_id or '' }}&date_from={{ date_from }}&date_to={{ date_to }}&per_page={{ per_page }}">{{ p }}</a>
+                            </li>
+                        {% elif p == 4 or p == total_pages - 3 %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page + 1 }}&search={{ search }}&movement_type={{ movement_type }}&product_id={{ product_id or '' }}&warehouse_id={{ warehouse_id or '' }}&date_from={{ date_from }}&date_to={{ date_to }}&per_page={{ per_page }}">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No se encontraron movimientos</h5>
+                <p class="text-muted">No hay movimientos que coincidan con los filtros aplicados</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

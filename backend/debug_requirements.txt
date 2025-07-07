@@ -1,0 +1,17 @@
+# Dependencias adicionales para el servidor de debug
+# Agregar estas líneas a requirements.txt si deseas más funcionalidades de debugging
+
+# Para monitoreo de sistema más avanzado
+# psutil==5.9.6
+
+# Para debugging más avanzado
+# pdb-clone==3.5.0
+# pudb==2022.1.3
+
+# Para profiling de rendimiento
+# py-spy==0.3.14
+# line_profiler==4.1.1
+
+# Para logging avanzado
+# structlog==23.2.0
+# colorlog==6.8.0

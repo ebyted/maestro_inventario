@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Completo - Maestro Inventario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico Completo - Maestro Inventario</h1>
+    
+    <div class="grid">
+        <!-- Backend Connectivity -->
+        <div class="container">
+            <h2>🖥️ Backend Connectivity</h2>
+            <button onclick="testBackend()">Test Backend Connection</button>
+            <button onclick="testAuth()">Test Authentication</button>
+            <button onclick="testProducts()">Test Products API</button>
+            <div id="backendLog" class="log"></div>
+        </div>
+
+        <!-- Frontend Status -->
+        <div class="container">
+            <h2>📱 Frontend Status</h2>
+            <button onclick="checkFrontendStatus()">Check Frontend</button>
+            <button onclick="simulateNavigation()">Simulate Navigation</button>
+            <div id="frontendLog" class="log"></div>
+        </div>
+
+        <!-- Database Info -->
+        <div class="container">
+            <h2>🗄️ Database Info</h2>
+            <button onclick="getDbInfo()">Get DB Statistics</button>
+            <button onclick="checkBusinesses()">Check Businesses</button>
+            <div id="dbLog" class="log"></div>
+        </div>
+
+        <!-- Environment Check -->
+        <div class="container">
+            <h2>🌍 Environment Check</h2>
+            <button onclick="checkEnvironment()">Check Environment</button>
+            <div id="envLog" class="log"></div>
+        </div>
+    </div>
+
+    <!-- Full Results -->
+    <div class="container">
+        <h2>📋 Complete Results</h2>
+        <div id="allResults" class="log" style="max-height: 400px;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let logMessages = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            logMessages.push(logMessage);
+            
+            console.log(logMessage);
+            updateAllResults();
+            
+            return logMessage;
+        }
+
+        function updateLog(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            element.innerHTML += `<div class="${className}">${message}</div>`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function updateAllResults() {
+            const element = document.getElementById('allResults');
+            element.innerHTML = logMessages.map(msg => `<div>${msg}</div>`).join('');
+            element.scrollTop = element.scrollHeight;
+        }
+
+        async function testBackend() {
+            const logId = 'backendLog';
+            document.getElementById(logId).innerHTML = '';
+            
+            try {
+                updateLog(logId, '🔄 Testing backend connection...', 'info');
+                const response = await fetch(`${API_BASE}/`);
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    updateLog(logId, `✅ Backend connected successfully`, 'success');
+                    updateLog(logId, `Response: ${data}`, 'info');
+                    log('✅ Backend connection successful', 'success');
+                } else {
+                    updateLog(logId, `❌ Backend returned status: ${response.status}`, 'error');
+                    log(`❌ Backend error: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                updateLog(logId, `❌ Backend connection failed: ${error.message}`, 'error');
+                log(`❌ Backend connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuth() {
+            const logId = 'backendLog';
+            
+            try {
+                updateLog(logId, '🔄 Testing authentication...', 'info');
+                const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'username=admin&password=admin123'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateLog(logId, `✅ Authentication successful`, 'success');
+                    updateLog(logId, `Token type: ${data.token_type}`, 'info');
+                    localStorage.setItem('auth_token', data.access_token);
+                    log('✅ Authentication successful', 'success');
+                } else {
+                    const errorData = await response.text();
+                    updateLog(logId, `❌ Authentication failed: ${response.status}`, 'error');
+                    updateLog(logId, `Error: ${errorData}`, 'error');
+                    log(`❌ Authentication failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                updateLog(logId, `❌ Authentication error: ${error.message}`, 'error');
+                log(`❌ Authentication error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProducts() {
+            const logId = 'backendLog';
+            
+            try {
+                updateLog(logId, '🔄 Testing products API...', 'info');
+                const token = localStorage.getItem('auth_token');
+                
+                if (!token) {
+                    updateLog(logId, '⚠️ No auth token found, trying without auth...', 'warning');
+                }
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const response = await fetch(`${API_BASE}/api/v1/products`, {
+                    headers: headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateLog(logId, `✅ Products API successful`, 'success');
+                    updateLog(logId, `Found ${data.length} products`, 'info');
+                    
+                    if (data.length > 0) {
+                        updateLog(logId, `First product: ${data[0].name} (ID: ${data[0].id})`, 'info');
+                        updateLog(logId, `Business ID: ${data[0].business_id}`, 'info');
+                    }
+                    log(`✅ Products API: ${data.length} products found`, 'success');
+                } else {
+                    const errorData = await response.text();
+                    updateLog(logId, `❌ Products API failed: ${response.status}`, 'error');
+                    updateLog(logId, `Error: ${errorData}`, 'error');
+                    log(`❌ Products API failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                updateLog(logId, `❌ Products API error: ${error.message}`, 'error');
+                log(`❌ Products API error: ${error.message}`, 'error');
+            }
+        }
+
+        async function getDbInfo() {
+            const logId = 'dbLog';
+            document.getElementById(logId).innerHTML = '';
+            
+            try {
+                updateLog(logId, '🔄 Getting database statistics...', 'info');
+                const token = localStorage.getItem('auth_token');
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                // Test products count
+                const productsResponse = await fetch(`${API_BASE}/api/v1/products`, {
+                    headers: headers
+                });
+                
+                if (productsResponse.ok) {
+                    const products = await productsResponse.json();
+                    updateLog(logId, `📊 Products in API: ${products.length}`, 'success');
+                    log(`📊 Products in API: ${products.length}`, 'info');
+                    
+                    // Group by business_id
+                    const byBusiness = products.reduce((acc, product) => {
+                        acc[product.business_id] = (acc[product.business_id] || 0) + 1;
+                        return acc;
+                    }, {});
+                    
+                    Object.entries(byBusiness).forEach(([businessId, count]) => {
+                        updateLog(logId, `   Business ${businessId}: ${count} products`, 'info');
+                    });
+                }
+                
+            } catch (error) {
+                updateLog(logId, `❌ Database info error: ${error.message}`, 'error');
+                log(`❌ Database info error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkBusinesses() {
+            const logId = 'dbLog';
+            
+            try {
+                updateLog(logId, '🔄 Checking businesses...', 'info');
+                const token = localStorage.getItem('auth_token');
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                // Try to get businesses if endpoint exists
+                const businessResponse = await fetch(`${API_BASE}/api/v1/businesses`, {
+                    headers: headers
+                });
+                
+                if (businessResponse.ok) {
+                    const businesses = await businessResponse.json();
+                    updateLog(logId, `🏢 Found ${businesses.length} businesses:`, 'success');
+                    businesses.forEach(business => {
+                        updateLog(logId, `   ${business.id}: ${business.name}`, 'info');
+                    });
+                    log(`🏢 Found ${businesses.length} businesses`, 'info');
+                } else {
+                    updateLog(logId, `⚠️ Businesses endpoint not available (${businessResponse.status})`, 'warning');
+                }
+                
+            } catch (error) {
+                updateLog(logId, `❌ Businesses check error: ${error.message}`, 'error');
+                log(`❌ Businesses check error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkFrontendStatus() {
+            const logId = 'frontendLog';
+            document.getElementById(logId).innerHTML = '';
+            
+            updateLog(logId, '🔄 Checking frontend environment...', 'info');
+            
+            // Check if running in browser
+            updateLog(logId, `📍 User Agent: ${navigator.userAgent}`, 'info');
+            updateLog(logId, `🌐 Current URL: ${window.location.href}`, 'info');
+            updateLog(logId, `📱 Screen: ${screen.width}x${screen.height}`, 'info');
+            
+            // Check localStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                updateLog(logId, `✅ localStorage available`, 'success');
+            } catch (error) {
+                updateLog(logId, `❌ localStorage not available: ${error.message}`, 'error');
+            }
+            
+            // Check if this is likely Expo web
+            const isExpoWeb = window.location.port === '19006' || window.location.href.includes('expo');
+            updateLog(logId, `📱 Expo Web detected: ${isExpoWeb ? 'YES' : 'NO'}`, isExpoWeb ? 'success' : 'info');
+            
+            log('📱 Frontend environment checked', 'info');
+        }
+
+        function simulateNavigation() {
+            const logId = 'frontendLog';
+            
+            updateLog(logId, '🧭 Simulating navigation patterns...', 'info');
+            
+            // Simulate React Navigation structure
+            const routes = [
+                'Dashboard',
+                'Products',
+                'Products/Debug',
+                'Products/Catalog', 
+                'Inventory',
+                'Sales',
+                'Settings'
+            ];
+            
+            routes.forEach(route => {
+                updateLog(logId, `   📄 Route: ${route}`, 'info');
+            });
+            
+            updateLog(logId, `✅ Navigation simulation complete`, 'success');
+            log('🧭 Navigation patterns simulated', 'info');
+        }
+
+        function checkEnvironment() {
+            const logId = 'envLog';
+            document.getElementById(logId).innerHTML = '';
+            
+            updateLog(logId, '🌍 Checking environment variables...', 'info');
+            
+            // Check common environment indicators
+            const env = {
+                'NODE_ENV': process?.env?.NODE_ENV || 'undefined',
+                'Development Mode': window.location.hostname === 'localhost',
+                'Protocol': window.location.protocol,
+                'Port': window.location.port || 'default',
+                'Timestamp': new Date().toISOString()
+            };
+            
+            Object.entries(env).forEach(([key, value]) => {
+                updateLog(logId, `   ${key}: ${value}`, 'info');
+            });
+            
+            // Check if common React Native components would be available
+            const components = ['AsyncStorage', 'Expo', 'React Native'];
+            components.forEach(component => {
+                const available = component === 'AsyncStorage' ? typeof localStorage !== 'undefined' : false;
+                updateLog(logId, `   ${component}: ${available ? 'Available' : 'Not detected'}`, available ? 'success' : 'info');
+            });
+            
+            log('🌍 Environment check completed', 'info');
+        }
+
+        // Auto-run basic checks on load
+        window.addEventListener('load', () => {
+            log('🚀 Diagnóstico iniciado', 'info');
+            setTimeout(() => {
+                testBackend();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
