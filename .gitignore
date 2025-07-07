@@ -206,11 +206,18 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 61d0090443072acc6bcfaae032becbcc068c56da
 node_modules/
 .env
 *.pyc
 __pycache__/
 *.db
+<<<<<<< HEAD
 .vscode/
 >>>>>>> 61d0090 (Proyecto maestro_inventario: backend y frontend separados)
+=======
+.vscode/
+>>>>>>> 61d0090443072acc6bcfaae032becbcc068c56da
