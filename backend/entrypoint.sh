@@ -9,8 +9,9 @@ done
 
 echo "PostgreSQL está listo."
 
-# Comprobar si la tabla businesses existe
+# Comprobar si la tabla businesses existe y si hay migraciones aplicadas
 EXISTS=$(PGPASSWORD=postgres psql -h db -U postgres -d maestro_inventario -tAc "SELECT to_regclass('public.businesses') IS NOT NULL;")
+ALEMBIC_VERSION=$(PGPASSWORD=postgres psql -h db -U postgres -d maestro_inventario -tAc "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'alembic_version';")
 
 if [ "$EXISTS" = "f" ]; then
   echo "La base de datos está vacía. Restaurando backup.sql..."
@@ -22,8 +23,14 @@ if [ "$EXISTS" = "f" ]; then
     exit 1
   fi
 else
-  echo "La base de datos ya tiene datos. Ejecutando alembic upgrade head..."
-  alembic upgrade head
+  # Si la tabla alembic_version no existe, crearla y hacer stamp
+  if [ "$ALEMBIC_VERSION" = "0" ]; then
+    echo "No hay tabla alembic_version. Ejecutando alembic stamp head..."
+    alembic stamp head
+  else
+    echo "La base de datos ya tiene datos y migraciones. Ejecutando alembic upgrade head..."
+    alembic upgrade head
+  fi
 fi
 
 # Iniciar la aplicación
