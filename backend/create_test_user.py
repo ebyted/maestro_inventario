@@ -20,27 +20,30 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 def create_test_user():
-    """Crea usuarios de prueba para testing: admin, capturista y almacenista"""
+    """Elimina todos los negocios y crea usuarios de prueba para testing: admin, capturista y almacenista"""
     try:
         db_session = next(get_db())
-        
-        # Obtener o crear el negocio principal
-        business = db_session.query(Business).filter(Business.name == "Maestro Inventario").first()
-        if not business:
-            business = Business(
-                name="Maestro Inventario",
-                description="Negocio principal para pruebas",
-                code="MI001",
-                tax_id="XAXX010101000",
-                rfc="XAXX010101000",
-                address="Dirección de prueba",
-                phone="0000000000",
-                email="admin@maestro.com",
-                is_active=True
-            )
-            db_session.add(business)
-            db_session.flush()  # Para obtener el ID
-            print("✅ Negocio 'Maestro Inventario' creado.")
+
+        # BORRAR TODOS LOS NEGOCIOS (y en cascada usuarios relacionados si aplica)
+        db_session.query(Business).delete()
+        db_session.commit()
+        print("🗑️ Todos los registros de 'businesses' eliminados.")
+
+        # Crear el negocio principal
+        business = Business(
+            name="Maestro Inventario",
+            description="Negocio principal para pruebas",
+            code="MI001",
+            tax_id="XAXX010101000",
+            rfc="XAXX010101000",
+            address="Dirección de prueba",
+            phone="0000000000",
+            email="admin@maestro.com",
+            is_active=True
+        )
+        db_session.add(business)
+        db_session.flush()  # Para obtener el ID
+        print("✅ Negocio 'Maestro Inventario' creado.")
 
         # Usuarios a crear: (email, nombre, apellido, rol, password, is_superuser)
         users_to_create = [
@@ -50,10 +53,6 @@ def create_test_user():
         ]
 
         for email, first_name, last_name, role, password, is_superuser in users_to_create:
-            existing_user = db_session.query(User).filter(User.email == email).first()
-            if existing_user:
-                print(f"✅ Usuario de prueba ya existe: {email}")
-                continue
             user = User(
                 email=email,
                 password_hash=get_password_hash(password),
