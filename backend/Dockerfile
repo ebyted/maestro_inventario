@@ -22,9 +22,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project
 COPY . .
+COPY ./templates /app/templates
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8020
 
 # Run the application
 CMD ["python", "main.py"]
