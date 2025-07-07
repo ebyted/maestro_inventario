@@ -15,13 +15,13 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      - "8020:8020"
     volumes:
       - ./backend:/app
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/maestro_inventario
       SECRET_KEY: your-secret-key-change-in-production
-      DEBUG: true
+      DEBUG: false
     depends_on:
       - db
 
