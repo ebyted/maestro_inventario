@@ -73,7 +73,7 @@ def health_check(db: Session = Depends(get_db)):
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
+        host="localhost",
         port=8020,
         reload=settings.DEBUG
     )

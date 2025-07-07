@@ -85,4 +85,4 @@ if __name__ == "__main__":
             print(f"Invalid port number: {sys.argv[1]}. Using default port 8020.")
     
     print(f"Starting server on port {port}")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="localhost", port=port)
