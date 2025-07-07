@@ -32,7 +32,6 @@ def create_test_user():
         # Crear el negocio principal
         business = Business(
             name="Maestro Inventario",
-            description="Negocio principal para pruebas",
             code="MI001",
             tax_id="XAXX010101000",
             rfc="XAXX010101000",
