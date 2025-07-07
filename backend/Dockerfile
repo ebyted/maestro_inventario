@@ -27,5 +27,5 @@ COPY ./templates /app/templates
 # Expose port
 EXPOSE 8020
 
-# Run the application
-CMD ["python", "main.py"]
+# Run Alembic migrations antes de iniciar la app
+CMD alembic upgrade head && python main.py
