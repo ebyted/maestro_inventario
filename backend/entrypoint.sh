@@ -10,7 +10,7 @@ done
 echo "PostgreSQL está listo."
 
 # Comprobar si la tabla businesses existe
-EXISTS=$(PGPASSWORD=postgres12 psql -h db -U postgres -d maestro_inventario -tAc "SELECT to_regclass('public.businesses') IS NOT NULL;")
+EXISTS=$(PGPASSWORD=postgres psql -h db -U postgres -d maestro_inventario -tAc "SELECT to_regclass('public.businesses') IS NOT NULL;")
 
 if [ "$EXISTS" = "f" ]; then
   echo "La base de datos está vacía. Restaurando backup.sql..."
