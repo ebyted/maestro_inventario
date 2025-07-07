@@ -61,17 +61,33 @@ def get_current_user(
 
 @router.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "error": None})
+    # Pasar variables de entorno al template
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "error": None,
+            "LOGIN_URL": os.getenv("LOGIN_URL", "/login"),
+            "DB_PORT": os.getenv("DB_PORT", "5432"),
+        }
+    )
 
 
 @router.post("/login", response_class=HTMLResponse)
 def login_post(request: Request, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = authenticate_user(db, email, password)
     if not user:
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Credenciales incorrectas"})
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "error": "Credenciales incorrectas",
+                "LOGIN_URL": os.getenv("LOGIN_URL", "/login"),
+                "DB_PORT": os.getenv("DB_PORT", "5432"),
+            }
+        )
     from fastapi.responses import RedirectResponse
     from starlette.status import HTTP_303_SEE_OTHER
-    # Crear token y setear en cookie (simple, no JWT para demo web)
     response = RedirectResponse(url="/redirect-dashboard", status_code=HTTP_303_SEE_OTHER)
     response.set_cookie(key="user_id", value=str(user.id), httponly=True)
     return response
