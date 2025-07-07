@@ -22,7 +22,6 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/maestro_inventario
       SECRET_KEY: inventario-maestro-inventario-secret-key-123456789abcdef
       DEBUG: false
-      LOGIN_URL: http://localhost:8020/login
       DB_PORT: 55432
     depends_on:
       - db
