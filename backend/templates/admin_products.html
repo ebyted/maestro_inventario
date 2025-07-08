@@ -146,6 +146,15 @@
                             <a href="/api/v1/products/{{ product.id }}" target="_blank" class="btn btn-sm btn-outline-info">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            <!-- Botón para agregar a movimiento -->
+                            <button type="button" class="btn btn-sm btn-outline-success" 
+                                data-bs-toggle="modal" data-bs-target="#addToMovementModal"
+                                data-product-id="{{ product.id }}"
+                                data-product-name="{{ product.name|e }}"
+                                data-product-code="{{ product.code|e }}"
+                                data-product-barcode="{{ product.barcode|e }}">
+                                <i class="fas fa-plus"></i> Agregar
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -241,9 +250,116 @@
         </div>
     </div>
 </div>
+
+<!-- Lista de artículos a mover -->
+<div class="card my-4" id="movementListCard">
+    <div class="card-header">
+        <h5 class="mb-0">Artículos a mover</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0" id="movementListTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Variante</th>
+                        <th>Cantidad</th>
+                        <th>Unidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se agregan dinámicamente los artículos -->
+                </tbody>
+            </table>
+        </div>
+        <div class="text-end p-3">
+            <button class="btn btn-success" id="registerMovementBtn" disabled>Registrar movimiento</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar a movimiento (actualizado con cantidad/unidad y variante) -->
+<div class="modal fade" id="addToMovementModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar producto a movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addToMovementForm">
+                    <div class="mb-3">
+                        <label class="form-label">Producto:</label>
+                        <input type="text" class="form-control" id="movementProductName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Variante:</label>
+                        <select class="form-select" id="movementProductVariant" required>
+                            <option value="">Selecciona variante</option>
+                            {% for variant in product_variants %}
+                                <option value="{{ variant.id }}" data-product-id="{{ variant.product_id }}">{{ variant.name or 'Principal' }} (SKU: {{ variant.sku }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad y Unidad:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" id="movementProductQty" min="1" value="1" required placeholder="Cantidad">
+                            <select class="form-select form-select-sm" id="movementProductUnit" required style="max-width: 120px;">
+                                <option value="">Unidad</option>
+                                {% for unit in units %}
+                                    <option value="{{ unit.id }}" {% if default_unit and unit.id == default_unit.id %}selected{% endif %}>{{ unit.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmAddToMovement">Agregar a lista</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Campos globales para movimiento -->
+<div class="card my-4" id="movementGlobalFields">
+    <div class="card-body row g-3">
+        <div class="col-md-3">
+            <label class="form-label">Tipo de movimiento</label>
+            <select class="form-select" id="movementType" required>
+                <option value="entry">Entrada</option>
+                <option value="exit">Salida</option>
+                <option value="adjustment">Ajuste</option>
+                <option value="transfer">Transferencia</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Almacén</label>
+            <select class="form-select" id="movementWarehouse" required>
+                <option value="">Selecciona almacén</option>
+                {% for warehouse in warehouses %}
+                    <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Referencia</label>
+            <input type="text" class="form-control" id="movementReference">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Notas</label>
+            <input type="text" class="form-control" id="movementNotes">
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
+{{ super() }}
 <script>
 // --- MODAL DATA POPULATION ---
 const editProductModal = document.getElementById('editProductModal');
@@ -257,5 +373,122 @@ if (editProductModal) {
         document.getElementById('edit_brand_id').value = button.getAttribute('data-brand-id') || '';
     });
 }
+
+// --- MODAL DATA POPULATION PARA AGREGAR A MOVIMIENTO ---
+const addToMovementModal = document.getElementById('addToMovementModal');
+if (addToMovementModal) {
+    addToMovementModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        if (!button) return;
+        document.getElementById('movementProductName').value = button.getAttribute('data-product-name') || '';
+        // Filtra variantes para el producto seleccionado
+        const productId = button.getAttribute('data-product-id');
+        const variantSelect = document.getElementById('movementProductVariant');
+        for (const opt of variantSelect.options) {
+            if (opt.value === '') continue;
+            opt.style.display = (opt.getAttribute('data-product-id') === productId) ? '' : 'none';
+        }
+        variantSelect.value = '';
+        // Selecciona unidad 'pieza' si existe
+        const unitSelect = document.getElementById('movementProductUnit');
+        let piezaFound = false;
+        for (let i = 0; i < unitSelect.options.length; i++) {
+            if (unitSelect.options[i].text.toLowerCase() === 'pieza') {
+                unitSelect.selectedIndex = i;
+                piezaFound = true;
+                break;
+            }
+        }
+        if (!piezaFound) unitSelect.selectedIndex = 0;
+        document.getElementById('movementProductQty').value = 1;
+        document.getElementById('addToMovementForm').setAttribute('data-product-id', productId);
+    });
+}
+
+// --- Lista de artículos a mover ---
+let movementList = [];
+
+function renderMovementList() {
+    const tbody = document.querySelector('#movementListTable tbody');
+    tbody.innerHTML = '';
+    movementList.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.variant_name}</td>
+            <td>${item.qty}</td>
+            <td>${item.unit_name}</td>
+            <td><button class='btn btn-danger btn-sm' onclick='window.removeFromMovementList(${idx})'><i class='fas fa-trash'></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('registerMovementBtn').disabled = movementList.length === 0;
+}
+
+window.removeFromMovementList = function(idx) {
+    movementList.splice(idx, 1);
+    renderMovementList();
+};
+
+// --- Acción al confirmar en el modal ---
+document.getElementById('confirmAddToMovement').onclick = function() {
+    const productId = document.getElementById('addToMovementForm').getAttribute('data-product-id');
+    const name = document.getElementById('movementProductName').value;
+    const variantSelect = document.getElementById('movementProductVariant');
+    const variantId = variantSelect.value;
+    const variantName = variantSelect.options[variantSelect.selectedIndex].text;
+    const qty = parseInt(document.getElementById('movementProductQty').value) || 1;
+    const unitSelect = document.getElementById('movementProductUnit');
+    const unitId = unitSelect.value;
+    const unitName = unitSelect.options[unitSelect.selectedIndex].text;
+    if (!variantId) {
+        alert('Selecciona una variante');
+        return;
+    }
+    if (!unitId) {
+        alert('Selecciona una unidad');
+        return;
+    }
+    movementList.push({ product_id: productId, name, product_variant_id: variantId, variant_name: variantName, qty, unit_id: unitId, unit_name: unitName });
+    renderMovementList();
+    var modal = bootstrap.Modal.getInstance(addToMovementModal);
+    modal.hide();
+};
+
+// --- Registrar movimiento ---
+document.getElementById('registerMovementBtn').onclick = function() {
+    if (movementList.length === 0) return;
+    const movementType = document.getElementById('movementType').value;
+    const warehouseId = document.getElementById('movementWarehouse').value;
+    const reference = document.getElementById('movementReference').value;
+    const notes = document.getElementById('movementNotes').value;
+    if (!movementType || !warehouseId) {
+        alert('Selecciona tipo de movimiento y almacén');
+        return;
+    }
+    const items = movementList.map(item => ({
+        product_variant_id: parseInt(item.product_variant_id),
+        quantity: item.qty,
+        unit_id: parseInt(item.unit_id)
+    }));
+    fetch('/api/v1/inventory-movements/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            movement_type: movementType,
+            warehouse_id: parseInt(warehouseId),
+            reference_number: reference,
+            notes: notes,
+            items: items
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        alert('Movimiento registrado');
+        movementList = [];
+        renderMovementList();
+    })
+    .catch(err => alert('Error al registrar movimiento'));
+};
 </script>
 {% endblock %}

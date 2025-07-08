@@ -5,10 +5,15 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-exchange-alt"></i> Análisis de Movimientos de Inventario</h1>
-    <a href="/admin/inventory-movements/export{% if search or movement_type or product_id or warehouse_id or date_from or date_to %}?search={{ search }}&movement_type={{ movement_type }}&product_id={{ product_id }}&warehouse_id={{ warehouse_id }}&date_from={{ date_from }}&date_to={{ date_to }}{% endif %}" 
-       class="btn btn-success">
-        <i class="fas fa-file-excel"></i> Exportar a Excel
-    </a>
+    <div>
+        <a href="/admin/inventory-movements/export{% if search or movement_type or product_id or warehouse_id or date_from or date_to %}?search={{ search }}&movement_type={{ movement_type }}&product_id={{ product_id }}&warehouse_id={{ warehouse_id }}&date_from={{ date_from }}&date_to={{ date_to }}{% endif %}" 
+           class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Exportar a Excel
+        </a>
+        <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#newMovementModal">
+            <i class="fas fa-plus"></i> Nuevo Movimiento
+        </button>
+    </div>
 </div>
 
 <!-- Estadísticas -->
@@ -252,4 +257,200 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Modal Nuevo Movimiento -->
+<div class="modal fade" id="newMovementModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar Movimiento de Inventario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="movementForm">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="movementType" class="form-label">Tipo de Movimiento</label>
+                            <select class="form-select" id="movementType" name="movement_type" required>
+                                <option value="entry">Entrada</option>
+                                <option value="exit">Salida</option>
+                                <option value="adjustment">Ajuste</option>
+                                <option value="transfer">Transferencia</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="warehouse" class="form-label">Almacén</label>
+                            <select class="form-select" id="warehouse" name="warehouse_id" required>
+                                {% for warehouse in warehouses %}
+                                    <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="reference" class="form-label">Referencia</label>
+                            <input type="text" class="form-control" id="reference" name="reference_number">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="notes" class="form-label">Notas</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6>Artículos</h6>
+                    <div id="itemsList">
+                        {% if product_variants|length == 0 %}
+        <div class="alert alert-warning">No hay artículos/productos activos disponibles para movimientos. Agrega productos primero.</div>
+    {% endif %}
+    <div class="row mb-2 item-row">
+        <div class="col-md-3">
+            <input type="text" class="form-control barcode-or-search" name="search_code[]" placeholder="Escanea código de barras o busca por nombre/código" oninput="filterProductDropdown(this)" onkeydown="barcodeInputHandler(event, this)">
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" name="product_variant_id[]" required {% if product_variants|length == 0 %}disabled{% endif %}>
+                <option value="">Selecciona producto</option>
+                {% for variant in product_variants %}
+                    <option value="{{ variant.id }}" data-code="{{ variant.sku }}" data-barcode="{{ variant.barcode }}" data-name="{{ variant.product.name }}{% if variant.name %} {{ variant.name }}{% endif %}">
+                        {{ variant.product.name }}{% if variant.name %} - {{ variant.name }}{% endif %} {% if variant.sku %}[{{ variant.sku }}]{% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="number" class="form-control" name="quantity[]" min="0.01" step="0.01" placeholder="Cantidad" required {% if product_variants|length == 0 %}disabled{% endif %}>
+        </div>
+        <div class="col-md-1">
+            <select class="form-select" name="unit_id[]" required {% if units|length == 0 %}disabled{% endif %}>
+                {% for unit in units %}
+                    <option value="{{ unit.id }}">{{ unit.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1 d-flex align-items-center">
+            <button type="button" class="btn btn-danger btn-sm remove-item" title="Quitar"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+</div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="addItemBtn">
+                        <i class="fas fa-plus"></i> Agregar Artículo
+                    </button>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Guardar Movimiento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Select2 para búsqueda en selects -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+// Inicializar Select2 en los selects de producto
+function initSelect2() {
+    document.querySelectorAll('select[name="product_variant_id[]"]').forEach(function(select) {
+        if (!select.classList.contains('select2-hidden-accessible')) {
+            $(select).select2({
+                dropdownParent: $('#newMovementModal'),
+                width: '100%',
+                placeholder: 'Selecciona producto',
+                allowClear: true
+            });
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    initSelect2();
+});
+document.getElementById('addItemBtn').onclick = function() {
+    const row = document.querySelector('.item-row').cloneNode(true);
+    row.querySelectorAll('input, select').forEach(el => el.value = '');
+    document.getElementById('itemsList').appendChild(row);
+    row.querySelector('.remove-item').onclick = function() {
+        row.remove();
+    };
+    initSelect2();
+};
+document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.onclick = function() {
+        btn.closest('.item-row').remove();
+    };
+});
+document.getElementById('movementForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const items = [];
+    form.querySelectorAll('.item-row').forEach(row => {
+        items.push({
+            product_variant_id: parseInt(row.querySelector('[name="product_variant_id[]"]').value),
+            quantity: parseFloat(row.querySelector('[name="quantity[]"]').value),
+            unit_id: parseInt(row.querySelector('[name="unit_id[]"]').value)
+        });
+    });
+    const payload = {
+        movement_type: form.movement_type.value,
+        warehouse_id: parseInt(form.warehouse_id.value),
+        reference_number: form.reference_number.value,
+        notes: form.notes.value,
+        items: items
+    };
+    const token = localStorage.getItem('access_token'); // O como manejes el token
+    const res = await fetch('/api/v1/inventory-movements/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+        const data = await res.json();
+        alert('Movimiento registrado correctamente. ID: ' + data.id);
+        location.reload();
+    } else {
+        const err = await res.json();
+        alert('Error: ' + (err.detail || 'No se pudo registrar el movimiento'));
+    }
+};
+function filterProductDropdown(input) {
+    const row = input.closest('.item-row');
+    const select = row.querySelector('select[name="product_variant_id[]"]');
+    const filter = input.value.toLowerCase();
+    Array.from(select.options).forEach(option => {
+        if (option.value === "") return option.style.display = '';
+        const code = option.getAttribute('data-code') || '';
+        const barcode = option.getAttribute('data-barcode') || '';
+        const name = option.getAttribute('data-name') || '';
+        if (code.toLowerCase().includes(filter) || name.toLowerCase().includes(filter) || barcode.toLowerCase().includes(filter)) {
+            option.style.display = '';
+        } else {
+            option.style.display = 'none';
+        }
+    });
+    select.selectedIndex = 0;
+}
+// Integración con lector de código de barras (enter selecciona si hay match exacto)
+function barcodeInputHandler(event, input) {
+    if (event.key === 'Enter') {
+        const row = input.closest('.item-row');
+        const select = row.querySelector('select[name="product_variant_id[]"]');
+        const value = input.value.trim().toLowerCase();
+        let found = false;
+        Array.from(select.options).forEach(option => {
+            const code = (option.getAttribute('data-code') || '').toLowerCase();
+            const barcode = (option.getAttribute('data-barcode') || '').toLowerCase();
+            if (value && (code === value || barcode === value)) {
+                select.value = option.value;
+                found = true;
+            }
+        });
+        if (!found) {
+            // Si no hay match exacto, filtra normalmente
+            filterProductDropdown(input);
+        }
+    }
+}
+</script>
 {% endblock %}
