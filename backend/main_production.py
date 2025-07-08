@@ -47,7 +47,8 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Incluir rutas de admin panel directamente en la raíz (sin prefijo /api/v1)
 app.include_router(admin_router, prefix="/admin", tags=["admin-panel"])
-app.include_router(auth.router, tags=["auth"])
+# Only include the web_router (HTML login) at the root
+app.include_router(auth.web_router, tags=["auth-web"])
 
 @app.get("/", include_in_schema=False)
 def root_redirect():

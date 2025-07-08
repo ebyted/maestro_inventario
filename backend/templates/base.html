@@ -235,6 +235,13 @@
                 showAlert(`Error: ${error}`, 'danger');
             });
         }
+
+        // Habilita el menú si hay token en localStorage (para SPA o login JS)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('access_token')) {
+                document.querySelectorAll('.sidebar.disabled').forEach(el => el.classList.remove('disabled'));
+            }
+        });
     </script>
 
     {% block scripts %}{% endblock %}

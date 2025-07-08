@@ -333,10 +333,13 @@
 <div class="row mb-4">
     <div class="col-md-6">
         <div class="card border-secondary">
-            <div class="card-header bg-secondary text-white">
-                <h5><i class="fas fa-database"></i> Estado de la Conexión y Base de Datos</h5>
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-database"></i> Estado de la Conexión y Base de Datos</h5>
+                <button id="refresh-status-btn" class="btn btn-sm btn-outline-light" title="Refrescar estado">
+                    <i class="fas fa-sync-alt"></i> Refrescar
+                </button>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="status-section">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <strong>Status conexión API:</strong>
@@ -357,6 +360,48 @@
                 </ul>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Logs de Actividad -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Actividad Reciente</h5>
+                <button id="refresh-log-btn" class="btn btn-sm btn-outline-dark" title="Refrescar logs">
+                    <i class="fas fa-sync-alt"></i> Refrescar
+                </button>
+            </div>
+            <div class="card-body">
+                <form id="log-filter-form" class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="log-user" placeholder="Usuario (email)">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="log-action" placeholder="Acción">
+                    </div>
+                    <div class="col-md-5 d-flex gap-1">
+                        <input type="date" class="form-control" id="log-start">
+                        <input type="date" class="form-control" id="log-end">
+                    </div>
+                </form>
+                <div id="activity-log-section">
+                    <div>Cargando actividad...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra de búsqueda global -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <form id="global-search-form" class="input-group mb-3">
+            <input type="text" class="form-control" id="global-search-input" placeholder="Buscar productos, almacenes, movimientos, usuarios...">
+            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Buscar</button>
+        </form>
+        <div id="global-search-results" class="mb-3"></div>
     </div>
 </div>
 
@@ -419,6 +464,146 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Agregar tooltip con información
         bar.setAttribute('title', `${current} de ${total} (${percentage.toFixed(1)}%)`);
+    });
+
+    const refreshBtn = document.getElementById('refresh-status-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando';
+            fetch('/api/v1/health')
+                .then(resp => resp.json())
+                .then(data => {
+                    let html = '<ul class="list-group list-group-flush">';
+                    html += '<li class="list-group-item"><strong>Status conexión API:</strong> ';
+                    if (data.db_status && data.db_status.startsWith('ok')) {
+                        html += '<span class="badge bg-success">Conectado</span>';
+                    } else {
+                        html += `<span class="badge bg-danger">${data.db_status}</span>`;
+                    }
+                    html += '</li>';
+                    if (data.database_url) {
+                        html += `<li class=\"list-group-item\"><strong>URL:</strong> <code>${data.database_url}</code></li>`;
+                    }
+                    if (data.version) {
+                        html += `<li class=\"list-group-item\"><strong>Versión:</strong> ${data.version}</li>`;
+                    }
+                    html += '</ul>';
+                    document.getElementById('status-section').innerHTML = html;
+                })
+                .catch(() => {
+                    document.getElementById('status-section').innerHTML = '<div class="alert alert-danger">No se pudo obtener el estado actual.</div>';
+                })
+                .finally(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refrescar';
+                });
+        });
+    }
+
+    // Función para cargar el log de actividad
+    function loadActivityLog() {
+        const section = document.getElementById('activity-log-section');
+        const user = document.getElementById('log-user').value;
+        const action = document.getElementById('log-action').value;
+        const start = document.getElementById('log-start').value;
+        const end = document.getElementById('log-end').value;
+        let url = '/api/v1/activity-log/?limit=10';
+        if (user) url += `&user_email=${encodeURIComponent(user)}`;
+        if (action) url += `&action=${encodeURIComponent(action)}`;
+        if (start) url += `&start=${start}`;
+        if (end) url += `&end=${end}`;
+        section.innerHTML = '<div>Cargando actividad...</div>';
+        fetch(url)
+            .then(resp => resp.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    let html = '<ul class="list-group">';
+                    data.forEach(log => {
+                        html += `<li class=\"list-group-item\">` +
+                            `<b>${log.action}</b> ` +
+                            (log.user_email ? `<span class=\"text-muted\">(${log.user_email})</span> ` : '') +
+                            `<br><small>${log.details || ''}</small> <br>` +
+                            `<span class=\"text-secondary\">${log.created_at ? new Date(log.created_at).toLocaleString() : ''}</span>` +
+                            `</li>`;
+                    });
+                    html += '</ul>';
+                    section.innerHTML = html;
+                } else {
+                    section.innerHTML = '<div class="text-muted">Sin actividad reciente.</div>';
+                }
+            })
+            .catch(() => {
+                section.innerHTML = '<div class="alert alert-danger">No se pudo obtener la actividad.</div>';
+            });
+    }
+    loadActivityLog();
+    const refreshLogBtn = document.getElementById('refresh-log-btn');
+    if (refreshLogBtn) {
+        refreshLogBtn.addEventListener('click', function() {
+            refreshLogBtn.disabled = true;
+            refreshLogBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando';
+            loadActivityLog();
+            setTimeout(() => {
+                refreshLogBtn.disabled = false;
+                refreshLogBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refrescar';
+            }, 1000);
+        });
+    }
+    document.getElementById('log-filter-form').addEventListener('input', function() {
+        loadActivityLog();
+    });
+
+    // Búsqueda global
+    document.getElementById('global-search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const q = document.getElementById('global-search-input').value.trim();
+        const resultsDiv = document.getElementById('global-search-results');
+        if (!q) {
+            resultsDiv.innerHTML = '';
+            return;
+        }
+        resultsDiv.innerHTML = '<div>Buscando...</div>';
+        Promise.all([
+            fetch(`/api/v1/products/?search=${encodeURIComponent(q)}&limit=5`).then(r=>r.json()),
+            fetch(`/api/v1/warehouses/?search=${encodeURIComponent(q)}&limit=5`).then(r=>r.json()),
+            fetch(`/api/v1/inventory-movements/?search=${encodeURIComponent(q)}&limit=5`).then(r=>r.json()),
+            fetch(`/api/v1/users/?search=${encodeURIComponent(q)}&limit=5`).then(r=>r.json())
+        ]).then(([products, warehouses, movements, users]) => {
+            let html = '';
+            if (products && products.length) {
+                html += '<h6>Productos</h6><ul class="list-group mb-2">';
+                products.forEach(p => {
+                    html += `<li class=\"list-group-item\"><b>${p.name}</b> <span class=\"text-muted\">SKU: ${p.sku || ''}</span></li>`;
+                });
+                html += '</ul>';
+            }
+            if (warehouses && warehouses.length) {
+                html += '<h6>Almacenes</h6><ul class="list-group mb-2">';
+                warehouses.forEach(w => {
+                    html += `<li class=\"list-group-item\"><b>${w.name}</b> <span class=\"text-muted\">${w.location || ''}</span></li>`;
+                });
+                html += '</ul>';
+            }
+            if (movements && movements.length) {
+                html += '<h6>Movimientos</h6><ul class="list-group mb-2">';
+                movements.forEach(m => {
+                    html += `<li class=\"list-group-item\">${m.movement_type || ''} <b>${m.product_name || ''}</b> (${m.quantity || ''} ${m.unit_name || ''})</li>`;
+                });
+                html += '</ul>';
+            }
+            if (users && users.length) {
+                html += '<h6>Usuarios</h6><ul class="list-group mb-2">';
+                users.forEach(u => {
+                    html += `<li class=\"list-group-item\"><b>${u.first_name} ${u.last_name}</b> <span class=\"text-muted\">${u.email}</span></li>`;
+                });
+                html += '</ul>';
+            }
+            if (!html) html = '<div class="text-muted">Sin resultados.</div>';
+            resultsDiv.innerHTML = html;
+        }).catch(() => {
+            resultsDiv.innerHTML = '<div class="alert alert-danger">Error en la búsqueda.</div>';
+        });
     });
 });
 </script>

@@ -1,0 +1,229 @@
+{
+  "accessibility": {
+    "/admin/dashboard": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 19309
+    },
+    "/admin/suppliers": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 17716
+    },
+    "/admin/warehouses": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 11067
+    },
+    "/admin/articles": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 16948
+    },
+    "/admin/purchase-orders": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 15487
+    },
+    "/admin/inventory-movements": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 14197
+    },
+    "/admin/executive-dashboard": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 35435
+    }
+  },
+  "exports": {
+    "/admin/suppliers/export": {
+      "status_code": 200,
+      "success": true,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "is_excel": true,
+      "content_length": 4789
+    },
+    "/admin/warehouses/export": {
+      "status_code": 200,
+      "success": true,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "is_excel": true,
+      "content_length": 4789
+    },
+    "/admin/articles/export": {
+      "status_code": 200,
+      "success": true,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "is_excel": true,
+      "content_length": 4788
+    },
+    "/admin/purchase-orders/export": {
+      "status_code": 200,
+      "success": true,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "is_excel": true,
+      "content_length": 4799
+    },
+    "/admin/inventory-movements/export": {
+      "status_code": 200,
+      "success": true,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "is_excel": true,
+      "content_length": 4797
+    }
+  },
+  "api": {
+    "/docs": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 949
+    },
+    "/openapi.json": {
+      "status_code": 404,
+      "success": false,
+      "content_length": 22
+    },
+    "/api/v1/products/": {
+      "status_code": 403,
+      "success": false,
+      "content_length": 30
+    },
+    "/api/v1/inventory/movements": {
+      "status_code": 403,
+      "success": false,
+      "content_length": 30
+    },
+    "/api/v1/suppliers/": {
+      "status_code": 403,
+      "success": false,
+      "content_length": 30
+    },
+    "/api/v1/warehouses/": {
+      "status_code": 403,
+      "success": false,
+      "content_length": 30
+    }
+  },
+  "filters": {
+    "/admin/suppliers?search=test": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 17720
+    },
+    "/admin/warehouses?search=principal": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 11076
+    },
+    "/admin/articles?search=producto": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 17038
+    },
+    "/admin/purchase-orders?status=pending": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 15563
+    },
+    "/admin/inventory-movements?movement_type=IN": {
+      "status_code": 200,
+      "success": true,
+      "content_length": 14284
+    }
+  },
+  "health": {
+    "status_code": 404,
+    "success": false,
+    "db_status": null,
+    "version": null,
+    "details": null
+  },
+  "product_crud": {
+    "create": {
+      "status_code": 403,
+      "success": false,
+      "id": null,
+      "content_ok": false
+    },
+    "update": {
+      "status_code": null,
+      "success": null,
+      "content_ok": false
+    },
+    "delete": {
+      "status_code": null,
+      "success": null
+    }
+  },
+  "warehouse_crud": {
+    "create": {
+      "status_code": 403,
+      "success": false,
+      "id": null,
+      "content_ok": false
+    },
+    "update": {
+      "status_code": null,
+      "success": null,
+      "content_ok": false
+    },
+    "delete": {
+      "status_code": null,
+      "success": null
+    }
+  },
+  "supplier_crud": {
+    "create": {
+      "status_code": 403,
+      "success": false,
+      "id": null,
+      "content_ok": false
+    },
+    "update": {
+      "status_code": null,
+      "success": null,
+      "content_ok": false
+    },
+    "delete": {
+      "status_code": null,
+      "success": null
+    }
+  },
+  "auth_permissions": {
+    "login_success": {
+      "status_code": 422,
+      "success": false
+    },
+    "login_fail": {
+      "status_code": 422,
+      "success": false
+    },
+    "protected_access": {
+      "status_code": 403,
+      "success": false
+    },
+    "protected_noauth": {
+      "status_code": 403,
+      "success": true
+    }
+  },
+  "error_scenarios": {
+    "bad_product": {
+      "status_code": 403,
+      "success": false
+    },
+    "bad_warehouse": {
+      "status_code": 403,
+      "success": false
+    },
+    "bad_supplier": {
+      "status_code": 403,
+      "success": false
+    },
+    "protected_noauth": {
+      "status_code": 403,
+      "success": true
+    }
+  }
+}

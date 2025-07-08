@@ -376,7 +376,7 @@ class TokenData(BaseModel):
     email: Optional[str] = None
 
 
-class UserLogin(BaseModel):
+class UserLoginRequest(BaseModel):
     email: EmailStr
     password: str
 

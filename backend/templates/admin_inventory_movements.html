@@ -119,11 +119,11 @@
             </div>
             <div class="col-md-1">
                 <label for="date_from" class="form-label">Desde</label>
-                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from if date_from and date_from != 'None' else '' }}">
             </div>
             <div class="col-md-1">
                 <label for="date_to" class="form-label">Hasta</label>
-                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to if date_to and date_to != 'None' else '' }}">
             </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary me-2">
@@ -260,18 +260,18 @@
 
 <!-- Modal Nuevo Movimiento -->
 <div class="modal fade" id="newMovementModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Registrar Movimiento de Inventario</h5>
+            <div class="modal-header bg-primary text-white">
+                <h4 class="modal-title"><i class="fas fa-exchange-alt me-2"></i>Registrar Movimiento de Inventario</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="movementForm">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label for="movementType" class="form-label">Tipo de Movimiento</label>
-                            <select class="form-select" id="movementType" name="movement_type" required>
+                    <div class="row g-3 mb-3 align-items-center">
+                        <div class="col-md-3">
+                            <label for="movementType" class="form-label fw-bold">Tipo de Movimiento</label>
+                            <select class="form-select form-control-lg" id="movementType" name="movement_type" required>
                                 <option value="entry">Entrada</option>
                                 <option value="exit">Salida</option>
                                 <option value="adjustment">Ajuste</option>
@@ -279,64 +279,69 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="warehouse" class="form-label">Almacén</label>
-                            <select class="form-select" id="warehouse" name="warehouse_id" required>
+                            <label for="warehouse" class="form-label fw-bold">Almacén</label>
+                            <select class="form-select form-control-lg" id="warehouse" name="warehouse_id" required>
                                 {% for warehouse in warehouses %}
                                     <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="reference" class="form-label">Referencia</label>
-                            <input type="text" class="form-control" id="reference" name="reference_number">
+                        <div class="col-md-3">
+                            <label for="reference" class="form-label fw-bold">Referencia</label>
+                            <input type="text" class="form-control form-control-lg" id="reference" name="reference_number" placeholder="Opcional">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <button type="button" class="btn btn-outline-primary btn-lg px-3 py-2 fw-bold shadow-sm d-flex align-items-center gap-2 w-100" id="addItemBtn" style="min-height:48px;">
+                                <i class="fas fa-box-open fa-lg text-primary"></i>
+                                <span>Agregar Artículo</span>
+                            </button>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <label for="notes" class="form-label">Notas</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                            <label for="notes" class="form-label fw-bold">Notas</label>
+                            <textarea class="form-control form-control-lg" id="notes" name="notes" rows="2" placeholder="Notas adicionales"></textarea>
                         </div>
                     </div>
                     <hr>
-                    <h6>Artículos</h6>
+                    <h6 class="fw-bold mb-2">Artículos</h6>
                     <div id="itemsList">
                         {% if product_variants|length == 0 %}
-        <div class="alert alert-warning">No hay artículos/productos activos disponibles para movimientos. Agrega productos primero.</div>
-    {% endif %}
-    <div class="row mb-2 item-row">
-        <div class="col-md-3">
-            <input type="text" class="form-control barcode-or-search" name="search_code[]" placeholder="Escanea código de barras o busca por nombre/código" oninput="filterProductDropdown(this)" onkeydown="barcodeInputHandler(event, this)">
-        </div>
-        <div class="col-md-4">
-            <select class="form-select" name="product_variant_id[]" required {% if product_variants|length == 0 %}disabled{% endif %}>
-                <option value="">Selecciona producto</option>
-                {% for variant in product_variants %}
-                    <option value="{{ variant.id }}" data-code="{{ variant.sku }}" data-barcode="{{ variant.barcode }}" data-name="{{ variant.product.name }}{% if variant.name %} {{ variant.name }}{% endif %}">
-                        {{ variant.product.name }}{% if variant.name %} - {{ variant.name }}{% endif %} {% if variant.sku %}[{{ variant.sku }}]{% endif %}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-3">
-            <input type="number" class="form-control" name="quantity[]" min="0.01" step="0.01" placeholder="Cantidad" required {% if product_variants|length == 0 %}disabled{% endif %}>
-        </div>
-        <div class="col-md-1">
-            <select class="form-select" name="unit_id[]" required {% if units|length == 0 %}disabled{% endif %}>
-                {% for unit in units %}
-                    <option value="{{ unit.id }}">{{ unit.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-1 d-flex align-items-center">
-            <button type="button" class="btn btn-danger btn-sm remove-item" title="Quitar"><i class="fas fa-trash"></i></button>
-        </div>
-    </div>
-</div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="addItemBtn">
-                        <i class="fas fa-plus"></i> Agregar Artículo
-                    </button>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Guardar Movimiento</button>
+                            <div class="alert alert-warning">No hay artículos/productos activos disponibles para movimientos. Agrega productos primero.</div>
+                        {% endif %}
+                        <div class="row g-2 mb-2 item-row align-items-center">
+                            <div class="col-md-5">
+                                <input type="text" class="form-control barcode-or-search" name="search_code[]" placeholder="Escanea código de barras o busca por nombre/código" oninput="filterProductDropdown(this)" onkeydown="barcodeInputHandler(event, this)">
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" name="product_variant_id[]" required {% if product_variants|length == 0 %}disabled{% endif %}>
+                                    <option value="">Selecciona producto</option>
+                                    {% for variant in product_variants %}
+                                        <option value="{{ variant.id }}" data-code="{{ variant.sku }}" data-barcode="{{ variant.barcode }}" data-name="{{ variant.product.name }}{% if variant.name %} {{ variant.name }}{% endif %}">
+                                            {{ variant.product.name }}{% if variant.name %} - {{ variant.name }}{% endif %} {% if variant.sku %}[{{ variant.sku }}]{% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" class="form-control" name="quantity[]" min="0.01" step="0.01" placeholder="Cantidad" required {% if product_variants|length == 0 %}disabled{% endif %}>
+                            </div>
+                            <div class="col-md-1">
+                                <select class="form-select" name="unit_id[]" required {% if units|length == 0 %}disabled{% endif %}>
+                                    {% for unit in units %}
+                                        <option value="{{ unit.id }}">{{ unit.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                <button type="button" class="btn btn-danger btn-sm remove-item d-flex align-items-center justify-content-center" style="height:40px; width:40px; border-radius:50%;" title="Quitar">
+                                    <i class="fas fa-trash fa-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-4">Guardar Movimiento</button>
                     </div>
                 </form>
             </div>
@@ -346,6 +351,7 @@
 
 <!-- Select2 para búsqueda en selects -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 // Inicializar Select2 en los selects de producto

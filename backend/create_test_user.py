@@ -59,7 +59,8 @@ def create_test_user():
                 last_name=last_name,
                 role=role,
                 is_active=True,
-                is_superuser=is_superuser
+                is_superuser=is_superuser,
+                must_change_password=True
             )
             db_session.add(user)
             db_session.flush()

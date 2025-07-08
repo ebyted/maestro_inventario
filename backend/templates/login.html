@@ -4,7 +4,7 @@
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
   <div class="card shadow p-4" style="min-width:350px;max-width:400px;">
     <h2 class="mb-4 text-center"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h2>
-    <form method="post" action="{{ LOGIN_URL if LOGIN_URL else '/login' }}">
+    <form id="loginForm">
       <div class="mb-3">
         <label for="email" class="form-label">Correo electrónico</label>
         <input type="email" class="form-control" id="email" name="email" required autofocus>
@@ -13,9 +13,7 @@
         <label for="password" class="form-label">Contraseña</label>
         <input type="password" class="form-control" id="password" name="password" required>
       </div>
-      {% if error %}
-      <div class="alert alert-danger py-2">{{ error }}</div>
-      {% endif %}
+      <div id="loginError" class="alert alert-danger py-2" style="display:none"></div>
       <button type="submit" class="btn btn-primary w-100">Entrar</button>
     </form>
     <div class="text-center mt-2" style="font-size:0.9em; color:#888;">
@@ -23,4 +21,32 @@
     </div>
   </div>
 </div>
+<script>
+document.getElementById('loginForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const errorDiv = document.getElementById('loginError');
+  errorDiv.style.display = 'none';
+  try {
+    const res = await fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem('access_token', data.access_token);
+      window.location.href = '/admin/executive-dashboard';
+    } else {
+      const err = await res.json();
+      errorDiv.textContent = err.detail || 'Error de autenticación';
+      errorDiv.style.display = 'block';
+    }
+  } catch (err) {
+    errorDiv.textContent = 'Error de red o servidor';
+    errorDiv.style.display = 'block';
+  }
+};
+</script>
 {% endblock %}

@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.db.database import engine
 from app.models.models import Base
+from app.models.login_attempt import LoginAttempt
 
 def crear_tablas():
     """Crea todas las tablas en PostgreSQL"""
@@ -22,7 +23,7 @@ def crear_tablas():
         time.sleep(10)
         
         print("🏗️ Creando todas las tablas...")
-        # Base.metadata.create_all(bind=engine)  # Solo para desarrollo, comentar en producción
+        Base.metadata.create_all(bind=engine)  # Solo para desarrollo, comentar en producción
         
         print("✅ Tablas creadas exitosamente")
         
