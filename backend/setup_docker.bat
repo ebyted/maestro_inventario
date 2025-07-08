@@ -46,6 +46,17 @@ echo.
 echo 5. Aplicando migraciones...
 alembic upgrade head
 
+REM =========================================
+REM  SECCIÓN DE STATUS Y DATOS DE CONEXIÓN BD
+REM =========================================
+echo.
+echo --------- STATUS DE CONEXIÓN BD ---------
+docker exec maestro-postgres psql -U postgres -d maestro_inventario -c "\conninfo"
+echo.
+echo --------- INFO DE LA BASE DE DATOS ---------
+docker exec maestro-postgres psql -U postgres -d maestro_inventario -c "SELECT current_database(), current_user, inet_server_addr(), inet_server_port();"
+echo.
+
 echo.
 echo ========================================
 echo   CONFIGURACIÓN COMPLETADA

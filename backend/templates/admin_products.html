@@ -303,16 +303,19 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Cantidad y Unidad:</label>
-                        <div class="input-group input-group-sm">
-                            <input type="number" class="form-control" id="movementProductQty" min="1" value="1" required placeholder="Cantidad">
-                            <select class="form-select form-select-sm" id="movementProductUnit" required style="max-width: 120px;">
-                                <option value="">Unidad</option>
+                        <label class="form-label" for="movementProductQty">Cantidad y Unidad:</label>
+                        <div class="input-group input-group-sm flex-nowrap w-100">
+                            <input type="number" class="form-control form-control-sm" id="movementProductQty" min="1" value="1" required placeholder="Cantidad" aria-label="Cantidad">
+                            <select class="form-select form-select-sm" id="movementProductUnit" required aria-label="Unidad" style="max-width: 120px;">
+                                <option value="" disabled selected>Unidad</option>
                                 {% for unit in units %}
+                                    {% if unit.is_active %}
                                     <option value="{{ unit.id }}" {% if default_unit and unit.id == default_unit.id %}selected{% endif %}>{{ unit.name }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
+                        <div class="invalid-feedback" id="unitInvalidFeedback" style="display:none;">Selecciona una unidad válida.</div>
                     </div>
                 </form>
             </div>
@@ -402,6 +405,9 @@ if (addToMovementModal) {
         if (!piezaFound) unitSelect.selectedIndex = 0;
         document.getElementById('movementProductQty').value = 1;
         document.getElementById('addToMovementForm').setAttribute('data-product-id', productId);
+        // Reset feedback
+        document.getElementById('movementProductUnit').classList.remove('is-invalid');
+        document.getElementById('unitInvalidFeedback').style.display = 'none';
     });
 }
 
@@ -441,13 +447,18 @@ document.getElementById('confirmAddToMovement').onclick = function() {
     const unitSelect = document.getElementById('movementProductUnit');
     const unitId = unitSelect.value;
     const unitName = unitSelect.options[unitSelect.selectedIndex].text;
+    // Validación visual
     if (!variantId) {
         alert('Selecciona una variante');
         return;
     }
     if (!unitId) {
-        alert('Selecciona una unidad');
+        unitSelect.classList.add('is-invalid');
+        document.getElementById('unitInvalidFeedback').style.display = '';
         return;
+    } else {
+        unitSelect.classList.remove('is-invalid');
+        document.getElementById('unitInvalidFeedback').style.display = 'none';
     }
     movementList.push({ product_id: productId, name, product_variant_id: variantId, variant_name: variantName, qty, unit_id: unitId, unit_name: unitName });
     renderMovementList();

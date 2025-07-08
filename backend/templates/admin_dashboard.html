@@ -329,6 +329,37 @@
     </div>
 </div>
 
+<!-- Sección de Status de Conexión y Base de Datos -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-secondary">
+            <div class="card-header bg-secondary text-white">
+                <h5><i class="fas fa-database"></i> Estado de la Conexión y Base de Datos</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Status conexión API:</strong>
+                        {% if db_status and db_status.startswith('OK') %}
+                            <span class="badge bg-success">Conectado</span>
+                        {% else %}
+                            <span class="badge bg-danger">{{ db_status }}</span>
+                        {% endif %}
+                    </li>
+                    {% if db_info %}
+                    <li class="list-group-item"><strong>URL:</strong> <code>{{ db_info.url }}</code></li>
+                    <li class="list-group-item"><strong>Driver:</strong> {{ db_info.driver }}</li>
+                    <li class="list-group-item"><strong>Base de datos:</strong> {{ db_info.database }}</li>
+                    <li class="list-group-item"><strong>Host:</strong> {{ db_info.host }}</li>
+                    <li class="list-group-item"><strong>Puerto:</strong> {{ db_info.port }}</li>
+                    <li class="list-group-item"><strong>Usuario:</strong> {{ db_info.user }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .table-container {
     background: white;

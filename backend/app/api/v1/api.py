@@ -1,7 +1,26 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.db.database import get_db
+from app.core.config import settings
+import sqlalchemy
+
 from app.api.v1.endpoints import auth, businesses, warehouses, products, inventory, suppliers, purchases, sales, users, units, categories, brands, admin_panel, inventory_movements
 
 api_router = APIRouter()
+
+@api_router.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    try:
+        db.execute("SELECT 1")
+        db_status = "ok"
+    except Exception as e:
+        db_status = f"error: {e}"
+    return {
+        "status": "ok" if db_status == "ok" else "error",
+        "db_status": db_status,
+        "version": getattr(settings, "PROJECT_NAME", "Maestro Inventario"),
+        "database_url": settings.DATABASE_URL
+    }
 
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
 api_router.include_router(businesses.router, prefix="/businesses", tags=["businesses"])
