@@ -33,5 +33,11 @@ else
   fi
 fi
 
+#!/bin/bash
+
+# Crear carpeta de logs si no existe
+mkdir -p /app/backend_logs
+
+
 # Iniciar la aplicación
 exec uvicorn main:app --host 0.0.0.0 --port 8020 --log-level info
