@@ -14,13 +14,7 @@ def setup_logging():
             "console": {
                 "class": "logging.StreamHandler",
                 "formatter": "default",
-            },
-            "file": {
-                "class": "logging.FileHandler",
-                "filename": "/app/backend_logs/backend.log",
-                "formatter": "default",
-                "mode": "a",
-            },
+                   },
         },
         "root": {
             "handlers": ["console", "file"],
