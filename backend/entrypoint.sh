@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+
 # Esperar a que la base de datos esté lista
 echo "Esperando a que PostgreSQL esté listo..."
 until pg_isready -h db -p 5432 -U postgres; do
@@ -34,4 +35,4 @@ else
 fi
 
 # Iniciar la aplicación
-exec python main.py
+exec uvicorn main:app --host 0.0.0.0 --port 8020 --log-level info

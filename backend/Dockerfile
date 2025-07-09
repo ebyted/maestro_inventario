@@ -23,12 +23,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 COPY ./templates /app/templates
-# Copiar el entrypoint personalizado
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
 
 # Expose port
 EXPOSE 8020
 
-# Usar entrypoint personalizado
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Run the application
+CMD ["python", "main.py"]
