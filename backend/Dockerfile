@@ -16,16 +16,15 @@ RUN apt-get update \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Copy project
 COPY . .
 COPY ./templates /app/templates
 # Copiar el entrypoint personalizado
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose port
 EXPOSE 8020

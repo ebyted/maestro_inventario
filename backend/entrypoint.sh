@@ -34,4 +34,4 @@ else
 fi
 
 # Iniciar la aplicación
-exec python main.py
+exec uvicorn main:app --host 0.0.0.0 --port 8020 --log-level info
