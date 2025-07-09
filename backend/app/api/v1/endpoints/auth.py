@@ -12,7 +12,6 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
 
-
 router = APIRouter()
 security = HTTPBearer()
 
