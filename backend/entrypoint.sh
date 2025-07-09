@@ -4,8 +4,6 @@ set -e
 # Crear carpeta de logs si no existe
 mkdir -p /app/backend_logs
 
-
-
 # Esperar a que la base de datos esté lista
 echo "Esperando a que PostgreSQL esté listo..."
 until pg_isready -h db -p 5432 -U postgres; do
@@ -37,10 +35,6 @@ else
     alembic upgrade head
   fi
 fi
-
-#!/bin/bash
-
-
 
 # Iniciar la aplicación
 exec uvicorn main:app --host 0.0.0.0 --port 8020 --log-level info
