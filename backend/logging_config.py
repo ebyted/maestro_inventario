@@ -14,10 +14,10 @@ def setup_logging():
             "console": {
                 "class": "logging.StreamHandler",
                 "formatter": "default",
-                   },
+            },
         },
         "root": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],  # <-- solo consola
             "level": "INFO",
         },
     }
