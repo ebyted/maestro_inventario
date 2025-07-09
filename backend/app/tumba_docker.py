@@ -4,7 +4,7 @@ import paramiko
 host = "168.231.67.221"
 port = 22
 username = "root"
-password = "H6+&3w?gPXjY)T?wODKo"
+password = "Arkano-IA2025"
 
 def ssh_connect():
     try:
@@ -17,7 +17,12 @@ def ssh_connect():
         client.connect(hostname=host, port=port, username=username, password=password)
 
         # Comando remoto (puedes cambiarlo)
-        command = "docker kill a8ced9a74184"
+        #command = "docker rm a8ced9a74184"
+        #command = "docker rm postgres:15
+
+        
+        command = "docker rm -f elcompadremix-backend-qjah1y-traefik-1"
+        
         stdin, stdout, stderr = client.exec_command(command)
 
         # Mostrar resultados
