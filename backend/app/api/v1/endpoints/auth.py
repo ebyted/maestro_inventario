@@ -10,25 +10,11 @@ from app.models import User
 from app.schemas import Token, UserCreate, User as UserSchema
 from app.schemas.__init__ import UserLoginRequest  # Use the renamed model
 from fastapi.responses import RedirectResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
-import os
-from app.models.login_attempt import LoginAttempt
-from sqlalchemy import and_, func as sa_func
 
 # --- API ROUTER (for /api/v1/auth) ---
 api_router = APIRouter()
 
 security = HTTPBearer()
-
-# Setup de templates (igual que en admin_panel)
-current_file = os.path.abspath(__file__)
-endpoints_dir = os.path.dirname(current_file)
-v1_dir = os.path.dirname(endpoints_dir)
-api_dir = os.path.dirname(v1_dir)
-app_dir = os.path.dirname(api_dir)
-backend_dir = os.path.dirname(app_dir)
-templates_dir = os.path.join(backend_dir, "templates")
-templates = Jinja2Templates(directory=templates_dir)
 
 
 def get_user_by_email(db: Session, email: str):
@@ -85,16 +71,7 @@ web_router = APIRouter()
 
 @web_router.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
-    # Pasar variables de entorno al template
-    return templates.TemplateResponse(
-        "login.html",
-        {
-            "request": request,
-            "error": None,
-            "LOGIN_URL": os.getenv("LOGIN_URL", "/login-form"),
-            "DB_PORT": os.getenv("DB_PORT", "5432"),
-        }
-    )
+    return HTMLResponse("<h1>Login</h1>")
 
 
 @web_router.post("/login-form", response_class=HTMLResponse)
