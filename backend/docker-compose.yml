@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: maestro_inventario
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "55432:5432"  # Puerto externo 55432, interno 5432
+    backend:
+     build: ./backend
+     ports:
+     - "8020:8000"
+     env_file: ./backend/.env
+    depends_on:
+     - db
+
+volumes:
+  db_data:
