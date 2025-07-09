@@ -29,12 +29,11 @@ __all__ = ["app"]
 if __name__ == "__main__":
     import uvicorn
     from app.core.config import settings
-    
+
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",  # <--- Cambia 'localhost' por '0.0.0.0'
+        host="0.0.0.0",
         port=8020,
         reload=settings.DEBUG,
-        log_level="info",
-        reload_exclude=["backend_logs/*"]
+        log_level="info"
     )
