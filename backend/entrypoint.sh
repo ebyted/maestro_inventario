@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-# Crear carpeta de logs si no existe
-mkdir -p /app/backend_logs
 
 # Esperar a que la base de datos esté lista
 echo "Esperando a que PostgreSQL esté listo..."
