@@ -154,4 +154,4 @@ def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 api_router = router
-web_router = router  # Si usas el mismo para web y API, o crea otro si los separas
+
