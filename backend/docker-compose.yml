@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "55432:5432"  # Puerto externo 55432, interno 5432
+      - "5432:5432"  # Puerto externo 55432, interno 5432
     backend:
      build: ./backend
      ports:
