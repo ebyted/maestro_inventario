@@ -10,22 +10,22 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"  # Puerto externo 55432, interno 5432
+      - "55432:5432"  # Puerto externo 55432, interno 5432
 
   backend:
     build: ./backend
     ports:
       - "8020:8020"
+    volumes:
+      - ./backend:/app
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/maestro_inventario
       SECRET_KEY: inventario-maestro-inventario-secret-key-123456789abcdef
-      DEBUG: true
-      DB_PORT: 5432
+      DEBUG: false
+      LOGIN_URL: http://localhost:8020/login
+      DB_PORT: 55432
     depends_on:
       - db
-    volumes:
-      - backend_logs:/app/backend_logs
 
 volumes:
   postgres_data:
-  backend_logs:
