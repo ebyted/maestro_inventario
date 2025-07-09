@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.db.database import get_db
 from app.models.models import Product, User
-from app.schemas import ProductCreate
+from app.schemas.production import ProductCreate
 from sqlalchemy.orm import Session
 
 def test_product_creation():

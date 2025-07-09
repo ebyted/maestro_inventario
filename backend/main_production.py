@@ -16,8 +16,8 @@ from app.api.v1.api import api_router
 from app.api.v1.endpoints.admin_panel import router as admin_router
 from app.api.v1.endpoints import auth
 
-# Crear tablas (solo para desarrollo, comentar en producción)
-# Base.metadata.create_all(bind=engine)
+# Crear tablas
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -42,17 +42,12 @@ def get_db():
     finally:
         db.close()
 
-# Incluir rutas de API REST
+# Incluir rutas de API
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-# Incluir rutas de admin panel
+# Incluir rutas de admin panel directamente en la raíz (sin prefijo /api/v1)
 app.include_router(admin_router, prefix="/admin", tags=["admin-panel"])
-
-# Incluir rutas web de autenticación (como /login)
-app.include_router(auth.web_router, tags=["auth-web"])
-
-# Incluir rutas de autenticación tipo API REST
-app.include_router(auth.api_router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(auth.router, tags=["auth"])
 
 @app.get("/", include_in_schema=False)
 def root_redirect():
@@ -62,6 +57,7 @@ def root_redirect():
 def health_check(db: Session = Depends(get_db)):
     """Verificar estado de la aplicación y base de datos"""
     try:
+        # Verificar conexión a base de datos
         db.execute("SELECT 1")
         return {
             "status": "healthy",
@@ -77,7 +73,7 @@ def health_check(db: Session = Depends(get_db)):
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        host="localhost",
+        host="0.0.0.0",
         port=8020,
         reload=settings.DEBUG
     )

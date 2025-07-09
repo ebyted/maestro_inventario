@@ -185,13 +185,9 @@ async def admin_products(
     categories = db.query(Category).order_by(Category.name).all()
     brands = db.query(Brand).order_by(Brand.name).all()
     
-    # Obtener variantes de producto activas para el modal y para productos
-    product_variants = db.query(ProductVariant).join(Product).filter(ProductVariant.is_active == True).order_by(Product.name, ProductVariant.name).all()
-    units = db.query(Unit).order_by(Unit.name).all()
-    # Buscar unidad 'pieza' como default
-    default_unit = next((u for u in units if u.name.lower() == 'pieza'), None)
-    # Calcular páginas
+    # Calcular paginación
     total_pages = (total + per_page - 1) // per_page
+    
     return templates.TemplateResponse("admin_products.html", {
         "request": request,
         "products": products,
@@ -205,10 +201,7 @@ async def admin_products(
         "category_id": category_id,
         "brand_id": brand_id,
         "has_category": has_category,
-        "has_brand": has_brand,
-        "product_variants": product_variants,
-        "units": units,
-        "default_unit": default_unit
+        "has_brand": has_brand
     })
 
 
@@ -1093,10 +1086,6 @@ async def admin_inventory_movements(
         ).count()
     }
     
-    # Obtener variantes de producto activas para el modal
-    product_variants = db.query(ProductVariant).join(Product).filter(ProductVariant.is_active == True).order_by(Product.name, ProductVariant.name).all()
-    units = db.query(Unit).order_by(Unit.name).all()
-    
     # Calcular páginas
     total_pages = (total + per_page - 1) // per_page
     
@@ -1116,9 +1105,7 @@ async def admin_inventory_movements(
         "product_id": product_id,
         "warehouse_id": warehouse_id,
         "date_from": date_from,
-        "date_to": date_to,
-        "product_variants": product_variants,
-        "units": units
+        "date_to": date_to
     })
 
 @router.get("/inventory-movements/export")
@@ -1820,3 +1807,4 @@ async def export_users_excel(
         media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         headers=headers
     )
+

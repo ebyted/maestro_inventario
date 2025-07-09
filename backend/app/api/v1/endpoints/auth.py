@@ -7,10 +7,11 @@ from app.core.config import settings
 from app.core.security import create_access_token, verify_password, verify_token, get_password_hash
 from app.db.database import get_db
 from app.models import User
-from app.schemas.production import Token, UserLogin, UserCreate, UserResponse as UserSchema
+from app.schemas import Token, UserLogin, UserCreate, User as UserSchema
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
+
 
 router = APIRouter()
 security = HTTPBearer()
@@ -109,6 +110,21 @@ def redirect_dashboard(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/admin/executive-dashboard")
 
 
+@router.post("/login", response_model=Token)
+def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
+    user = authenticate_user(db, user_credentials.email, user_credentials.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.post("/register", response_model=UserSchema)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
@@ -137,8 +153,3 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserSchema)
 def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
-
-api_router = router
-
-web_router = router  # Si usas el mismo router para web y API
-

@@ -47,7 +47,6 @@ class User(Base):
     role = Column(Enum(UserRole), default=UserRole.EMPLOYEE)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
-    must_change_password = Column(Boolean, default=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -60,7 +59,7 @@ class Business(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), nullable=False)
-    description = Column(Text) 
+    description = Column(Text)
     code = Column(String(50), unique=True, index=True)
     tax_id = Column(String(50))
     rfc = Column(String(50))  # RFC field that the application expects
