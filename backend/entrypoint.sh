@@ -1,3 +1,6 @@
+# Crear carpeta de logs si no existe
+mkdir -p /app/backend_logs
+
 #!/bin/bash
 set -e
 
@@ -35,8 +38,6 @@ fi
 
 #!/bin/bash
 
-# Crear carpeta de logs si no existe
-mkdir -p /app/backend_logs
 
 
 # Iniciar la aplicación
