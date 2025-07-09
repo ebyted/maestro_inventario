@@ -35,5 +35,6 @@ if __name__ == "__main__":
         host="localhost",
         port=8020,
         reload=settings.DEBUG,
-        log_level="info"
+        log_level="info",
+        reload_exclude=["backend_logs/*"]
     )
