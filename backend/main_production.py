@@ -71,6 +71,9 @@ def health_check(db: Session = Depends(get_db)):
             detail=f"Database connection failed: {str(e)}"
         )
 
+# Incluye los routers de autenticación
+app.include_router(auth.api_router, prefix="/api/v1/auth", tags=["auth"])
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
