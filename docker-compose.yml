@@ -19,7 +19,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/maestro_inventario
       SECRET_KEY: inventario-maestro-inventario-secret-key-123456789abcdef
-      DEBUG: false
+      DEBUG: true
       DB_PORT: 5432
     depends_on:
       - db
