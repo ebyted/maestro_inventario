@@ -23,7 +23,7 @@ def ssh_connect():
         
        # command = "docker rm -f elcompadremix-backend-qjah1y-traefik-1"
        # command = "docker rm -f 8dadd70c3174"
-        command = "docker rmi -f postgres:16" 
+        command = "docker ps"  
 
        
        # command = " docker ps -a"

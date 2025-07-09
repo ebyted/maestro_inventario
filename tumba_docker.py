@@ -17,7 +17,9 @@ def ssh_connect():
         client.connect(hostname=host, port=port, username=username, password=password)
 
         # Comando remoto (puedes cambiarlo)
-        command = "docker kill a8ced9a74184"
+        #command = "docker kill a8ced9a74184"
+        command = "docker ps"
+        
         stdin, stdout, stderr = client.exec_command(command)
 
         # Mostrar resultados
