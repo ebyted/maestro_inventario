@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.security import create_access_token, verify_password, verify_token, get_password_hash
 from app.db.database import get_db
 from app.models import User
-from app.schemas import Token, UserLogin, UserCreate, User as UserSchema
+from app.schemas.production import Token, UserLogin, UserCreate, UserResponse as UserSchema
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
