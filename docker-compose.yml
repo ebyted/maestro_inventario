@@ -23,6 +23,9 @@ services:
       DB_PORT: 5432
     depends_on:
       - db
+    volumes:
+      - backend_logs:/app/backend_logs
 
 volumes:
   postgres_data:
+  backend_logs:
