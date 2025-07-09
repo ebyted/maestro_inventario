@@ -26,6 +26,7 @@ COPY ./templates /app/templates
 
 # Expose port
 EXPOSE 8020
+RUN mkdir -p /app/backend_logs
 
 # Run the application
 CMD ["python", "main.py"]
