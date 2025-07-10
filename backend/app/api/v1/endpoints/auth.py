@@ -11,6 +11,7 @@ from app.schemas import Token, UserLogin, UserCreate, User as UserSchema
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
+from app.core.audit import log_action
 
 router = APIRouter()
 security = HTTPBearer()
@@ -90,6 +91,7 @@ def login_post(request: Request, email: str = Form(...), password: str = Form(..
     from starlette.status import HTTP_303_SEE_OTHER
     response = RedirectResponse(url="/redirect-dashboard", status_code=HTTP_303_SEE_OTHER)
     response.set_cookie(key="user_id", value=str(user.id), httponly=True)
+    log_action(user.id, "login", detail=f"email={user.email}")
     return response
 
 
@@ -97,6 +99,8 @@ def login_post(request: Request, email: str = Form(...), password: str = Form(..
 def logout():
     response = RedirectResponse(url="/login")
     response.delete_cookie("user_id")
+    # No user_id disponible aquí, pero se puede registrar la acción
+    log_action("unknown", "logout")
     return response
 
 

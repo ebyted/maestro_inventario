@@ -2,7 +2,7 @@ import requests
 import json
 
 # Test the movements endpoint
-base_url = "http://localhost:8000"
+base_url = "http://127.0.0.1:8020"
 
 # First, let's get a token (we'll need to authenticate)
 login_data = {

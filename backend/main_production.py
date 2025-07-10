@@ -15,6 +15,7 @@ from app.models import Base
 from app.api.v1.api import api_router
 from app.api.v1.endpoints.admin_panel import router as admin_router
 from app.api.v1.endpoints import auth
+from app.core.error_handlers import add_error_handlers
 
 # Crear tablas (solo para desarrollo, comentar en producción)
 # Base.metadata.create_all(bind=engine)
@@ -23,6 +24,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+add_error_handlers(app)
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:

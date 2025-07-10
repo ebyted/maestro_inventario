@@ -4,7 +4,7 @@ Script de prueba para verificar login y productos
 import requests
 import json
 
-API_BASE = "http://localhost:8000/api/v1"
+API_BASE = "http://127.0.0.1:8020/api/v1"
 
 def test_login():
     """Probar login"""

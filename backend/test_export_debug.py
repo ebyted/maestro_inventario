@@ -19,7 +19,7 @@ def test_export_endpoint(endpoint_name, url):
         return False
 
 def main():
-    base_url = "http://localhost:8000/admin"
+    base_url = "http://127.0.0.1:8020/admin"
     
     endpoints = [
         ("Warehouses Export", f"{base_url}/warehouses/export"),

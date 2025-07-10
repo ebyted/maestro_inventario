@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models import User, UserRole
@@ -7,6 +7,10 @@ from app.schemas import User as UserSchema, UserRole as UserRoleSchema, UserRole
 from app.api.v1.endpoints.auth import get_current_user
 
 router = APIRouter()
+
+
+def is_admin(user: User):
+    return user.role == "ADMIN" or (hasattr(user.role, "value") and user.role.value == "ADMIN")
 
 
 @router.get("/", response_model=List[UserSchema])
@@ -37,6 +41,8 @@ def create_user_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo un administrador puede asignar roles.")
     role_dict = role_data.dict()
     role_dict['user_id'] = user_id
     

@@ -19,6 +19,10 @@ from datetime import datetime
 router = APIRouter()
 
 
+def is_admin(user: User):
+    return user.role == "ADMIN" or (hasattr(user.role, "value") and user.role.value == "ADMIN")
+
+
 @router.get("/", response_model=List[PurchaseOrderResponse])
 def read_purchase_orders(
     business_id: int,
@@ -77,24 +81,26 @@ def read_purchase_order(
 @router.post("/", response_model=PurchaseOrderResponse)
 def create_purchase_order(
     purchase_order: PurchaseOrderCreate,
-    business_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo un administrador puede crear órdenes de compra.")
+    
     """Create a new purchase order."""
     # Verify business, supplier, and warehouse exist
-    business = db.query(Business).filter(Business.id == business_id).first()
+    business = db.query(Business).filter(Business.id == purchase_order.business_id).first()
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")
     
     supplier = db.query(Supplier).filter(
-        and_(Supplier.id == purchase_order.supplier_id, Supplier.business_id == business_id)
+        and_(Supplier.id == purchase_order.supplier_id, Supplier.business_id == purchase_order.business_id)
     ).first()
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
     
     warehouse = db.query(Warehouse).filter(
-        and_(Warehouse.id == purchase_order.warehouse_id, Warehouse.business_id == business_id)
+        and_(Warehouse.id == purchase_order.warehouse_id, Warehouse.business_id == purchase_order.business_id)
     ).first()
     if not warehouse:
         raise HTTPException(status_code=404, detail="Warehouse not found")
@@ -107,7 +113,7 @@ def create_purchase_order(
         # Check if order number already exists
         existing = db.query(PurchaseOrder).filter(
             and_(
-                PurchaseOrder.business_id == business_id,
+                PurchaseOrder.business_id == purchase_order.business_id,
                 PurchaseOrder.order_number == order_number
             )
         ).first()
@@ -122,7 +128,7 @@ def create_purchase_order(
     # Create purchase order
     po_data = purchase_order.dict(exclude={'items'})
     po_data.update({
-        'business_id': business_id,
+        'business_id': purchase_order.business_id,
         'user_id': current_user.id,
         'order_number': order_number,
         'subtotal': subtotal,

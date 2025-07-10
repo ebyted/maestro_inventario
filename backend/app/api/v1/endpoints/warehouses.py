@@ -10,6 +10,10 @@ from app.models import User
 router = APIRouter()
 
 
+def is_admin(user: User):
+    return user.role == "ADMIN" or (hasattr(user.role, "value") and user.role.value == "ADMIN")
+
+
 @router.get("/", response_model=List[WarehouseSchema])
 def read_warehouses(
     business_id: int = None,
@@ -31,6 +35,8 @@ def create_warehouse(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo un administrador puede crear almacenes.")
     db_warehouse = Warehouse(**warehouse.dict())
     db.add(db_warehouse)
     db.commit()

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Security
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, func, desc
 from app.db.database import get_db
@@ -11,8 +11,13 @@ from app.schemas import (
 )
 from app.schemas.inventory import ProductWithInventory, ProductSearchFilters
 from app.api.v1.endpoints.auth import get_current_user
+from app.core.audit import log_action
 
 router = APIRouter()
+
+
+def is_admin(user: User):
+    return user.role == "ADMIN" or (hasattr(user.role, "value") and user.role.value == "ADMIN")
 
 
 @router.get("/", response_model=List[ProductSchema])
@@ -165,6 +170,8 @@ def create_product(
     db.commit()
     db.refresh(db_product)
     
+    log_action(current_user.id, "create_product", detail=f"product={product.name}")
+    
     return db_product
 
 
@@ -214,6 +221,8 @@ def update_product(
     db.commit()
     db.refresh(db_product)
     
+    log_action(current_user.id, "update_product", detail=f"product_id={product_id}")
+    
     return db_product
 
 
@@ -223,7 +232,9 @@ def delete_product(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Eliminar producto (soft delete)"""
+    """Eliminar producto (soft delete, solo ADMIN)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo un administrador puede eliminar productos.")
     
     db_product = db.query(Product).filter(Product.id == product_id).first()
     if not db_product:
@@ -246,6 +257,7 @@ def delete_product(
         # Hard delete if no inventory
         db.delete(db_product)
         db.commit()
+        log_action(current_user.id, "delete_product", detail=f"product_id={product_id}")
         return {"message": "Product deleted"}
 
 

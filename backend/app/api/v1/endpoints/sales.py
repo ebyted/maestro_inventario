@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models import Sale, SaleItem, Inventory
@@ -9,6 +9,10 @@ from app.models import User
 import uuid
 
 router = APIRouter()
+
+
+def is_admin(user: User):
+    return user.role == "ADMIN" or (hasattr(user.role, "value") and user.role.value == "ADMIN")
 
 
 @router.get("/", response_model=List[SaleSchema])
@@ -32,6 +36,9 @@ def create_sale(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo un administrador puede registrar ventas.")
+    
     # Calculate totals
     subtotal = sum(item.total_price for item in sale_data.items)
     tax = subtotal * 0.16  # 16% tax

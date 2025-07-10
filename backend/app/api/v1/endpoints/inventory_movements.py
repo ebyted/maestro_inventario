@@ -6,6 +6,7 @@ from app.db.database import get_db
 from app.models.models import InventoryMovement, Warehouse, ProductVariant, Unit, User, MovementType
 from app.api.v1.endpoints.auth import get_current_user
 from pydantic import BaseModel, Field
+from app.core.audit import log_action
 
 router = APIRouter(prefix="/inventory-movements", tags=["Inventory Movements"])
 
@@ -30,12 +31,17 @@ class InventoryMovementResponse(BaseModel):
     created_at: datetime
     items: List[InventoryMovementItemCreate]
 
+def is_admin(user: User):
+    return user.role == "ADMIN" or (hasattr(user.role, "value") and user.role.value == "ADMIN")
+
 @router.post("/", response_model=InventoryMovementResponse)
 def create_inventory_movement(
     movement: InventoryMovementCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo un administrador puede registrar movimientos de inventario.")
     warehouse = db.query(Warehouse).filter(Warehouse.id == movement.warehouse_id).first()
     if not warehouse:
         raise HTTPException(status_code=404, detail="Warehouse not found")
@@ -63,6 +69,7 @@ def create_inventory_movement(
         created_movements.append(inv_move)
     db.commit()
     db.refresh(created_movements[0])
+    log_action(current_user.id, "create_inventory_movement", detail=f"type={movement.movement_type} items={len(movement.items)}")
     return InventoryMovementResponse(
         id=created_movements[0].id,
         movement_type=created_movements[0].movement_type.value,

@@ -5,7 +5,7 @@ Test script for warehouse dashboard functionality
 import requests
 import json
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://127.0.0.1:8020"
 
 def test_warehouse_dashboard():
     """Test warehouse dashboard endpoints"""
@@ -108,6 +108,6 @@ if __name__ == "__main__":
     try:
         test_warehouse_dashboard()
     except requests.exceptions.ConnectionError:
-        print("Error: Could not connect to server. Make sure the backend is running on http://localhost:8000")
+        print("Error: Could not connect to server. Make sure the backend is running on http://127.0.0.1:8020")
     except Exception as e:
         print(f"Error during testing: {e}")

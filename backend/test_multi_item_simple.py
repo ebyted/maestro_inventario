@@ -7,7 +7,7 @@ import json
 from datetime import datetime, timedelta
 
 # Configuración
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://127.0.0.1:8020"
 API_BASE = f"{BASE_URL}/api/v1"
 
 def print_separator(title: str):
@@ -58,7 +58,7 @@ def make_request(method: str, endpoint: str, data: dict = None, use_api_base: bo
         return result
         
     except requests.exceptions.ConnectionError:
-        print_error("No se pudo conectar al servidor. ¿Está corriendo en localhost:8000?")
+        print_error("No se pudo conectar al servidor. ¿Está corriendo en 127.0.0.1:8020?")
         return None
     except Exception as e:
         print_error(f"Error inesperado: {str(e)}")
@@ -305,7 +305,7 @@ def test_get_movement_details(movement_id: int):
 def main():
     """Función principal que ejecuta todas las pruebas"""
     print("🚀 Iniciando pruebas de endpoints multi-item")
-    print("🎯 Servidor: localhost:8000 (servidor simple sin autenticación)")
+    print("🎯 Servidor: 127.0.0.1:8020 (servidor simple sin autenticación)")
     print("="*60)
     
     # Verificar servidor

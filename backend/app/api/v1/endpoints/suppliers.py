@@ -13,6 +13,10 @@ from app.models.models import User
 router = APIRouter()
 
 
+def is_admin(user: User):
+    return user.role == "ADMIN" or (hasattr(user.role, "value") and user.role.value == "ADMIN")
+
+
 @router.get("/", response_model=List[SupplierResponse])
 def read_suppliers(
     business_id: int,
@@ -58,34 +62,13 @@ def read_supplier(
 @router.post("/", response_model=SupplierResponse)
 def create_supplier(
     supplier: SupplierCreate,
-    business_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Create a new supplier."""
-    # Verify business exists and user has access
-    business = db.query(Business).filter(Business.id == business_id).first()
-    if not business:
-        raise HTTPException(status_code=404, detail="Business not found")
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Solo un administrador puede crear proveedores.")
     
-    # Check if supplier with same name or email exists in this business
-    existing = db.query(Supplier).filter(
-        and_(
-            Supplier.business_id == business_id,
-            or_(
-                Supplier.name == supplier.name,
-                Supplier.email == supplier.email
-            )
-        )
-    ).first()
-    
-    if existing:
-        raise HTTPException(
-            status_code=400, 
-            detail="Supplier with same name or email already exists"
-        )
-    
-    db_supplier = Supplier(**supplier.dict(), business_id=business_id)
+    db_supplier = Supplier(**supplier.dict())
     db.add(db_supplier)
     db.commit()
     db.refresh(db_supplier)

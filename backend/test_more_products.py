@@ -3,7 +3,7 @@ Probar el API con más productos
 """
 import requests
 
-API_BASE = "http://localhost:8000/api/v1"
+API_BASE = "http://127.0.0.1:8020/api/v1"
 
 def test_with_more_products():
     # Login

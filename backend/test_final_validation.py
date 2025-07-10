@@ -58,7 +58,7 @@ def test_admin_page(page_name, url):
         return False
 
 def main():
-    base_url = "http://localhost:8000/admin"
+    base_url = "http://127.0.0.1:8020/admin"
     
     print("🔍 MAESTRO INVENTARIO - FINAL VALIDATION TEST")
     print("=" * 60)
