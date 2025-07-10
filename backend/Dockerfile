@@ -31,4 +31,4 @@ RUN chmod +x /app/entrypoint.sh
 EXPOSE 8020
 
 # Usar entrypoint personalizado
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["uvicorn", "main_production:app", "--host", "0.0.0.0", "--port", "8020"]
