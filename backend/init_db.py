@@ -29,7 +29,7 @@ def init_db():
         # 1. Crear usuario administrador
         admin_user = User(
             email="admin@maestro.com",
-            hashed_password=get_password_hash("123456"),
+            password_hash=get_password_hash("123456"),
             first_name="Admin",
             last_name="Maestro",
             is_active=True,
