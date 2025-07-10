@@ -188,6 +188,7 @@ class User(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
