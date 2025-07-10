@@ -1,28 +1,83 @@
 #!/bin/bash
 
-# Parámetros
+# Script robusto para migrar la base de datos PostgreSQL de un entorno local (Docker) a un VPS (Docker)
+# Incluye validaciones, logs, manejo de errores y limpieza de archivos temporales
+
+# =====================
+# CONFIGURACIÓN INICIAL
+# =====================
 CONTENEDOR_LOCAL="maestro-postgres"
 CONTENEDOR_VPS="sancho-distribuidora-app-vaekv1-db-1"
 DB="maestro_inventario"
 USUARIO="postgres"
 VPS_USER="root"
 VPS_HOST="168.231.67.221"
-VPS_PATH="resp.sql"  # Ruta en el VPS donde se copiará el respaldo
+VPS_PATH="backup.dump"  # Ruta en el VPS donde se copiará el respaldo
 VPS_PASS="Arkano-IA2025"
+DOCKER_DB_NAME="maestro_inventario"  # Destino
+LOG="migra_dump.log"
 
-echo "🟢 1. Generando respaldo local..."
-docker exec -t $CONTENEDOR_LOCAL pg_dump -U $USUARIO -d $DB --inserts > resp.sql
+set -euo pipefail
+trap 'echo "❌ Error en la línea $LINENO. Revisa $LOG"; exit 1' ERR
 
-echo "🟢 2. Copiando respaldo al VPS..."
-sshpass -p "$VPS_PASS" scp resp.sql $VPS_USER@$VPS_HOST:$VPS_PATH
+# =============
+# FUNCIONES
+# =============
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG"
+}
 
-echo "🟢 3. Borrando base de datos actual en el VPS..."
-sshpass -p "$VPS_PASS" ssh $VPS_USER@$VPS_HOST "docker exec -i $CONTENEDOR_VPS psql -U $USUARIO -d $DB -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'"
+limpiar() {
+    log "Limpiando archivos temporales locales..."
+    rm -f ./backup.dump
+}
 
-echo "🟢 4. Reiniciando el contenedor de la base de datos en el VPS..."
-sshpass -p "$VPS_PASS" ssh $VPS_USER@$VPS_HOST "docker down $CONTENEDOR_VPS"
+# =============
+# INICIO DEL SCRIPT
+# =============
+log "==== INICIO MIGRACIÓN ===="
 
-echo "🟢 5. Restaurando respaldo en el VPS..."
-#sshpass -p "$VPS_PASS" ssh $VPS_USER@$VPS_HOST "docker exec -i $CONTENEDOR_VPS psql -U $USUARIO -d $DB -f $VPS_PATH"
+# 1. Generar respaldo local
+log "1. Generando respaldo local..."
+docker exec -t "$CONTENEDOR_LOCAL" pg_dump -U "$USUARIO" -d "$DB" -Fc -f backup.dump
+# Copiar el backup al host local
 
-echo "✅ Proceso completado."
+if [ ! -f ./backup.dump ]; then
+    log "❌ Error: No se generó el archivo backup.dump"
+    exit 1
+fi
+
+# 2. Copiar respaldo al VPS
+log "2. Copiando respaldo al VPS..."
+sshpass -p "$VPS_PASS" scp -o StrictHostKeyChecking=no backup.dump "$VPS_USER"@"$VPS_HOST":"$VPS_PATH"
+
+# 3. Borrar base de datos actual en el VPS
+log "3. Borrando base de datos actual en el VPS..."
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no "$VPS_USER"@"$VPS_HOST" "docker exec -i $CONTENEDOR_VPS psql -U $USUARIO -d $DB -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'"
+
+# 4. Reiniciar el contenedor de la base de datos en el VPS
+log "4. Reiniciando el contenedor de la base de datos en el VPS..."
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no "$VPS_USER"@"$VPS_HOST" "docker restart $CONTENEDOR_VPS"
+sleep 5
+
+# 5. Restaurar el backup en la base de datos DESTINO dentro del contenedor VPS
+log "5. Restaurando backup en el VPS..."
+# Copiar el backup dentro del contenedor VPS
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no "$VPS_USER"@"$VPS_HOST" "docker cp $VPS_PATH $CONTENEDOR_VPS:/tmp/backup.dump"
+# Restaurar backup
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no "$VPS_USER"@"$VPS_HOST" "docker exec -i $CONTENEDOR_VPS pg_restore -U $USUARIO -d $DOCKER_DB_NAME /tmp/backup.dump"
+
+# 6. Aplicar migraciones con Alembic (debe ejecutarse en el contenedor de la app, no el de la DB)
+log "6. Aplicando migraciones Alembic en el VPS..."
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no "$VPS_USER"@"$VPS_HOST" "docker exec -i sancho-distribuidora-app-vaekv1-app-1 bash -c 'alembic stamp head && alembic upgrade head'"
+
+# 7. Validación final (opcional: conteo de usuarios, tablas, etc.)
+log "7. Validando migración (conteo de usuarios)..."
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no "$VPS_USER"@"$VPS_HOST" "docker exec -i $CONTENEDOR_VPS psql -U $USUARIO -d $DB -c 'SELECT COUNT(*) FROM users;'"
+
+# 8. Limpieza
+limpiar
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no "$VPS_USER"@"$VPS_HOST" "rm -f $VPS_PATH"
+
+log "==== MIGRACIÓN COMPLETADA EXITOSAMENTE ===="
+echo "✅ Proceso completado. Revisa $LOG para detalles."
