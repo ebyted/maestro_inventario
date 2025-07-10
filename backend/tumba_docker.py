@@ -35,7 +35,7 @@ def ssh_connect():
 # conectarse a la BD:  docker exec -it sancho-distribuidora-app-vaekv1-db-1 psql -U postgres -d maestro_inventario
 # ejecutar SQL: docker exec -it sancho-distribuidora-app-vaekv1-db-1 psql -U postgres -d maestro_inventario -c "SELECT * FROM users;"
 
-
+# $2b$12$mEGX8Kq6XfXrstNo1A0Ga.rm3ofvCi3HEHTEoFsWjQEZ2QhLnjaa.
 
         
         stdin, stdout, stderr = client.exec_command(command)
