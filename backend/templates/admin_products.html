@@ -70,6 +70,9 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5>Lista de Productos</h5>
         <div>
+            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#createProductModal">
+                <i class="fas fa-plus-circle"></i> Nuevo Producto
+            </button>
             <span class="text-muted">Página {{ current_page }} de {{ total_pages }}</span>
         </div>
     </div>
@@ -81,10 +84,14 @@
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
-                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>SKU</th>
+                    <th>Código Barras</th>
                     <th>Categoría</th>
                     <th>Marca</th>
                     <th>Unidad Base</th>
+                    <th>Stock Mínimo</th>
+                    <th>Stock Máximo</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -93,18 +100,10 @@
                 {% for product in products %}
                 <tr>
                     <td>{{ product.id }}</td>
-                    <td>
-                        <strong>{{ product.name }}</strong>
-                        {% if product.description %}
-                        <br><small class="text-muted">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</small>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <code>{{ product.code }}</code>
-                        {% if product.barcode %}
-                        <br><small class="text-muted">{{ product.barcode }}</small>
-                        {% endif %}
-                    </td>
+                    <td><strong>{{ product.name }}</strong></td>
+                    <td><small class="text-muted">{{ product.description or '' }}</small></td>
+                    <td><code>{{ product.sku or '' }}</code></td>
+                    <td><small class="text-muted">{{ product.barcode or '' }}</small></td>
                     <td>
                         {% if product.category %}
                         <span class="badge bg-info">{{ product.category.name }}</span>
@@ -119,41 +118,34 @@
                         <span class="badge bg-warning">Sin marca</span>
                         {% endif %}
                     </td>
-                    <td>
-                        {% if product.base_unit %}
-                        {{ product.base_unit.name }}
-                        {% else %}
-                        <span class="text-muted">N/A</span>
-                        {% endif %}
-                    </td>
+                    <td>{{ product.base_unit.name if product.base_unit else 'N/A' }}</td>
+                    <td>{{ product.minimum_stock if product.minimum_stock is not none else 'N/A' }}</td>
+                    <td>{{ product.maximum_stock if product.maximum_stock is not none else 'N/A' }}</td>
                     <td>
                         {% if product.is_active %}
                         <span class="badge bg-success">Activo</span>
                         {% else %}
-                        <span class="badge bg-secondary">Inactivo</span>
+                        <span class="badge bg-danger">Inactivo</span>
                         {% endif %}
                     </td>
                     <td>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                data-bs-toggle="modal" data-bs-target="#editProductModal"
-                                data-product-id="{{ product.id }}"
-                                data-product-name="{{ product.name|e }}"
-                                data-category-id="{{ product.category.id if product.category else '' }}"
-                                data-brand-id="{{ product.brand.id if product.brand else '' }}">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-primary btn-edit"
+                                    data-id="{{ product.id }}"
+                                    data-name="{{ product.name }}"
+                                    data-description="{{ product.description or '' }}"
+                                    data-sku="{{ product.sku or '' }}"
+                                    data-barcode="{{ product.barcode or '' }}"
+                                    data-category-id="{{ product.category_id or '' }}"
+                                    data-brand-id="{{ product.brand_id or '' }}"
+                                    data-base-unit-id="{{ product.base_unit_id or '' }}"
+                                    data-minimum-stock="{{ product.minimum_stock or '' }}"
+                                    data-maximum-stock="{{ product.maximum_stock or '' }}"
+                                    data-is-active="{{ product.is_active|lower }}">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <a href="/api/v1/products/{{ product.id }}" target="_blank" class="btn btn-sm btn-outline-info">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <!-- Botón para agregar a movimiento -->
-                            <button type="button" class="btn btn-sm btn-outline-success" 
-                                data-bs-toggle="modal" data-bs-target="#addToMovementModal"
-                                data-product-id="{{ product.id }}"
-                                data-product-name="{{ product.name|e }}"
-                                data-product-code="{{ product.code|e }}"
-                                data-product-barcode="{{ product.barcode|e }}">
-                                <i class="fas fa-plus"></i> Agregar
+                            <button class="btn btn-sm btn-danger btn-delete" data-id="{{ product.id }}">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
@@ -207,52 +199,182 @@
     </div>
 </div>
 
-<!-- Edit Product Relationships Modal -->
+<!-- Edit Product Modal -->
 <div class="modal fade" id="editProductModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Editar Relaciones del Producto</h5>
+                <h5 class="modal-title">Editar Producto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="editProductForm" action="" method="post">
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Producto:</label>
-                        <p id="productName" class="fw-bold"></p>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_category_id" class="form-label">Categoría</label>
-                        <select class="form-select" id="edit_category_id" name="category_id">
-                            <option value="">Sin categoría</option>
-                            {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_brand_id" class="form-label">Marca</label>
-                        <select class="form-select" id="edit_brand_id" name="brand_id">
-                            <option value="">Sin marca</option>
-                            {% for brand in brands %}
-                            <option value="{{ brand.id }}">{{ brand.name }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_name" class="form-label">Nombre del Producto*</label>
+                                <input type="text" class="form-control" id="edit_name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_description" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_sku" class="form-label">SKU</label>
+                                <input type="text" class="form-control" id="edit_sku" name="sku">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_barcode" class="form-label">Código de Barras</label>
+                                <input type="text" class="form-control" id="edit_barcode" name="barcode">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_category_id" class="form-label">Categoría</label>
+                                <select class="form-select" id="edit_category_id" name="category_id">
+                                    <option value="">Sin categoría</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_brand_id" class="form-label">Marca</label>
+                                <select class="form-select" id="edit_brand_id" name="brand_id">
+                                    <option value="">Sin marca</option>
+                                    {% for brand in brands %}
+                                    <option value="{{ brand.id }}">{{ brand.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_base_unit_id" class="form-label">Unidad Base</label>
+                                <select class="form-select" id="edit_base_unit_id" name="base_unit_id">
+                                    <option value="">Seleccionar unidad</option>
+                                    {% for unit in units %}
+                                    <option value="{{ unit.id }}">{{ unit.name }} ({{ unit.symbol }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_minimum_stock" class="form-label">Stock Mínimo</label>
+                                        <input type="number" class="form-control" id="edit_minimum_stock" name="minimum_stock" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_maximum_stock" class="form-label">Stock Máximo</label>
+                                        <input type="number" class="form-control" id="edit_maximum_stock" name="maximum_stock" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="edit_is_active" name="is_active" checked>
+                                <label class="form-check-label" for="edit_is_active">Producto Activo</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="submitForm('editProductForm', 'Producto actualizado exitosamente')">
-                        Guardar cambios
-                    </button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Lista de artículos a mover -->
-<div class="card my-4" id="movementListCard">
+<!-- Create Product Modal -->
+<div class="modal fade" id="createProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Nuevo Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createProductForm" action="/api/v1/admin/products/create" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="create_name" class="form-label">Nombre del Producto*</label>
+                                <input type="text" class="form-control" id="create_name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="create_description" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="create_description" name="description" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="create_sku" class="form-label">SKU</label>
+                                <input type="text" class="form-control" id="create_sku" name="sku">
+                            </div>
+                            <div class="mb-3">
+                                <label for="create_barcode" class="form-label">Código de Barras</label>
+                                <input type="text" class="form-control" id="create_barcode" name="barcode">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="create_category_id" class="form-label">Categoría</label>
+                                <select class="form-select" id="create_category_id" name="category_id">
+                                    <option value="">Sin categoría</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="create_brand_id" class="form-label">Marca</label>
+                                <select class="form-select" id="create_brand_id" name="brand_id">
+                                    <option value="">Sin marca</option>
+                                    {% for brand in brands %}
+                                    <option value="{{ brand.id }}">{{ brand.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="create_base_unit_id" class="form-label">Unidad Base</label>
+                                <select class="form-select" id="create_base_unit_id" name="base_unit_id">
+                                    <option value="">Seleccionar unidad</option>
+                                    {% for unit in units %}
+                                    <option value="{{ unit.id }}">{{ unit.name }} ({{ unit.symbol }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="create_minimum_stock" class="form-label">Stock Mínimo</label>
+                                        <input type="number" class="form-control" id="create_minimum_stock" name="minimum_stock" step="0.01" value="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="create_maximum_stock" class="form-label">Stock Máximo</label>
+                                        <input type="number" class="form-control" id="create_maximum_stock" name="maximum_stock" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="create_is_active" name="is_active" checked>
+                                <label class="form-check-label" for="create_is_active">Producto Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Crear Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de artículos a mover - OCULTA -->
+<div class="card my-4" id="movementListCard" style="display: none;">
     <div class="card-header">
         <h5 class="mb-0">Artículos a mover</h5>
     </div>
@@ -370,10 +492,25 @@ if (editProductModal) {
     editProductModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
         if (!button) return;
-        document.getElementById('productName').textContent = button.getAttribute('data-product-name');
-        document.getElementById('editProductForm').action = `/api/v1/admin/products/${button.getAttribute('data-product-id')}/update-relationships`;
+        
+        // Establecer la acción del formulario
+        const productId = button.getAttribute('data-id');
+        document.getElementById('editProductForm').action = `/api/v1/admin/products/${productId}/update`;
+        
+        // Llenar todos los campos del formulario con los datos del producto
+        document.getElementById('edit_name').value = button.getAttribute('data-name') || '';
+        document.getElementById('edit_description').value = button.getAttribute('data-description') || '';
+        document.getElementById('edit_sku').value = button.getAttribute('data-sku') || '';
+        document.getElementById('edit_barcode').value = button.getAttribute('data-barcode') || '';
         document.getElementById('edit_category_id').value = button.getAttribute('data-category-id') || '';
         document.getElementById('edit_brand_id').value = button.getAttribute('data-brand-id') || '';
+        document.getElementById('edit_base_unit_id').value = button.getAttribute('data-base-unit-id') || '';
+        document.getElementById('edit_minimum_stock').value = button.getAttribute('data-minimum-stock') || '';
+        document.getElementById('edit_maximum_stock').value = button.getAttribute('data-maximum-stock') || '';
+        
+        // Manejar el checkbox de is_active
+        const isActive = button.getAttribute('data-is-active') === 'true';
+        document.getElementById('edit_is_active').checked = isActive;
     });
 }
 
@@ -494,7 +631,7 @@ document.getElementById('registerMovementBtn').onclick = function() {
         })
     })
     .then(r => r.json())
-    .then(data => {
+    .then data => {
         alert('Movimiento registrado');
         movementList = [];
         renderMovementList();
