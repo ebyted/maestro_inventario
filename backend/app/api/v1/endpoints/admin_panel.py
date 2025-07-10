@@ -1597,6 +1597,7 @@ async def create_user_admin(
         last_name=last_name,
         email=email,
         password_hash=get_password_hash(password),
+        hashed_password=get_password_hash(password),
         role=user_role,
         is_active=is_active
     )
@@ -1685,6 +1686,7 @@ async def change_user_password_admin(
     
     # Actualizar contraseña
     user.password_hash = get_password_hash(new_password)
+    user.hashed_password    = get_password_hash(new_password)
     db.commit()
     
     return {"success": True, "message": "Contraseña actualizada exitosamente"}

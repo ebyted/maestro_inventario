@@ -31,6 +31,7 @@ try:
             print(f"✅ Activo: {user.is_active}")
             print(f"🔐 Superuser: {user.is_superuser}")
             print(f"🔑 Hash password exists: {bool(user.password_hash)}")
+            print(f"🔑 Hash password exists: {bool(user.hash_password)}")
             print(f"📝 Nombre: {user.first_name} {user.last_name}")
             print("---")
 except Exception as e:
