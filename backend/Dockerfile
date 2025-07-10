@@ -25,8 +25,8 @@ RUN pip install -r requirements.txt
 COPY . .
 COPY ./templates /app/templates
 # Copiar el entrypoint personalizado
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+#COPY entrypoint.sh /app/entrypoint.sh
+#RUN chmod +x /app/entrypoint.sh
 
 # Expose port
 EXPOSE 8020
